@@ -11,14 +11,14 @@
 #include <mach-o/nlist.h>
 #include <sys/_types/_size_t.h>
 #include <mach-o/fixup-chains.h>
-#include "../not_really_cs_blobs.h"
 #include <sys/types.h>
 #include <sys/stat.h>
-
-#include <arpa/inet.h>
-
 #include <CommonCrypto/CommonDigest.h>
 #include <sys/mman.h>
+#include "../../not_really_cs_blobs.h"
+#include "../include/helpers.h"
+#include "../include/macho_parser.h"
+#include "../include/debug.h"
 
 
 // Write a "linker" that takes no input and produces the file header and the sections as binary blobs which are identical to the smallest executable.
@@ -27,11 +27,6 @@
 	The idea then is to 'hand-write' the small_c_program executable
 */
 
-uint64_t align_to(uint64_t val, uint64_t align) {
-  if (align == 0)
-	return val;
-  return (val + align - 1) & ~(align - 1);
-}
 
 struct OutputFile {
 	char* filename;
@@ -752,33 +747,7 @@ size_t compute_size_for_code_signature_section(char* filename, uint32_t offset_o
 }
 
 
-int64_t min(int64_t x, int64_t y) {
-	return x < y ? x : y;
-}
 
-#define LOG2(X) ((unsigned) (8*sizeof (unsigned long long) - __builtin_clzll((X)) - 1))
-
-uint8_t le_to_be_8(uint8_t num) {
-	return num;
-}
-
-uint16_t le_to_be_16(uint16_t num) {
-	return (num>>8) | (num<<8);
-}
-
-//        byte3					 byte2						byte1					byte0
-// | 31 30 29 28 27 26 25 | 24 23 22 21 20 19 18 17 | 16 15 14 13 12 11 10 9 | 8 7 6 5 4 3 2 1 0 |
-
-uint32_t le_to_be_32(uint32_t num) {
-	return 	((num>>24)& 0xff)    | 				// move byte 3 to byte 0
-			((num<<8)& 0xff0000) | 				// move byte 1 to byte 2
-			((num>>8)& 0xff00) 	| 				// move byte 2 to byte 1
-			((num<<24)& 0xff000000);			// byte 0 to byte 3
-}
-
-uint64_t le_to_be_64(uint64_t num) {
-	return (le_to_be_32((uint32_t) num & 0xffffffff00000000) | le_to_be_32((uint32_t) num & 0x00000000ffffffff));
-}
 
 //template <typename E>
 //void CodeSignatureSection<E>::write_signature(Context<E> &ctx) {
@@ -1206,12 +1175,28 @@ FILE* generate_handwritten_executable_file(void)
 }
 
 
+
 int main(int argc, char** argv) 
 {
-	FILE* file_ptr = generate_handwritten_executable_file();
+	if (argc != 2) {
+		printf("For now only ONE mach-o file supported\n");
+		printf("Usage: %s <mach-o file>\n", argv[0]);
+		exit(1);
+	}
+	FILE* fptr = open_macho_file(argv[1], "rb");
+	struct MachoHandle* macho_handle = build_macho_handle(fptr);
+	if (macho_handle->filetype != RelocatableObjectFile) {
+		printf("Error: Only relocatable object files supported\n");
+		exit(1);
+	}
+
+	printf("Debugging...\n");
+	print_segments_and_sections(macho_handle);
+
+	//FILE* file_ptr = generate_handwritten_executable_file();
 	
 	
-	fclose(file_ptr);
+	//fclose(file_ptr);
 	
 	return 0;
 }

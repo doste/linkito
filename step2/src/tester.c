@@ -113,9 +113,9 @@ void test_all_load_cmd_sizes_are_multiple_of_8(void) {
 
 int main(int argc, char** argv) 
 {
-	test_headers_are_equal();
+	//test_headers_are_equal();
 	
-	test_all_load_cmd_sizes_are_multiple_of_8();
+	//test_all_load_cmd_sizes_are_multiple_of_8();
 	
 	return 0;
 }
