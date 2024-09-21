@@ -11,6 +11,7 @@
 #include <mach-o/reloc.h>
 #include <sys/errno.h>
 #include "../include/macho_parser.h"
+#include "../include/debug.h"
 
 
 //  *** Section ***
@@ -87,42 +88,20 @@ FILE* open_macho_file(const char *pathname, const char *mode) {
     return fptr;
 }
 
-
-void get_cmd_and_cmdsize_of_load_command(struct MachoHandle* handle, uint32_t* cmd, uint32_t* cmdsize) {
+void get_cmd_and_cmdsize_of_load_command(struct MachoHandle* macho_handle, uint32_t* cmd,
+                                            uint32_t* cmdsize, size_t* offset_to_read_from_buffer) {
     // Read the first 8 bytes to get cmd and cmdsize
     //struct load_command {
 	//uint32_t cmd;		/* type of load command */
 	//uint32_t cmdsize;	/* total size of command in bytes */
-
-    size_t items_read = 0;
-
-    // We'll move the fptr so we need to save its value
-    long saved_fptr = ftell(handle->fptr);
-
-    // first we get the 'cmd' field
-    items_read = fread(cmd, sizeof(uint32_t), 1, handle->fptr);
-    assert(items_read == 1);
-
-    items_read = 0;
-    // and then, to get the 'cmdsize' we move the fptr so it skips the 'cmd' field.
-    //fseek(handle->fptr, sizeof(uint32_t), SEEK_SET);   NO HACE FALTA ESTO!!! el fptr ya quedo apuntando, por el fread anterior.
-    items_read = fread(cmdsize, sizeof(uint32_t), 1, handle->fptr);
-    assert(items_read == 1);
-
-    // Restore the value of the fptr
-    if (fseek(handle->fptr, saved_fptr, SEEK_SET) != 0) printf("fseek error\n");
-
-    if (*cmdsize == 0) {
-        printf("Error reading cmd\n");
-        exit(1);
-    }
-
-    /* For some reason the following doesn't work :( TODO: keep investigating why
-    read_struct_from_file(handle->fptr, cmd, sizeof(uint32_t), 0, false);
-    read_struct_from_file(handle->fptr, cmdsize, sizeof(uint32_t), 0, true);
-    */
-
+    uint8_t* buffer = macho_handle->input_file->buffer;
+    memcpy(cmd, buffer + *offset_to_read_from_buffer, sizeof(uint32_t));
+    *offset_to_read_from_buffer += sizeof(uint32_t);
+    memcpy(cmdsize, buffer + *offset_to_read_from_buffer, sizeof(uint32_t));
+    *offset_to_read_from_buffer += sizeof(uint32_t);
 }
+
+
 /*
 char* build_string_table(struct MachoHandle* handle, struct symtab_command* symtab) {
     // We'll move the fptr so we need to save its value
@@ -244,17 +223,28 @@ struct symtab_command* read_symtab(struct MachoHandle* handle) {
 }
 */
 
-void read_segment(struct MachoHandle* handle, struct segment_command_64* segment_cmd) {
-    read_struct_from_file(handle->fptr, segment_cmd, sizeof(struct segment_command_64), 0, false);
-}
-void read_section(struct MachoHandle* handle, struct section_64* section_cmd) {
-    read_struct_from_file(handle->fptr, section_cmd, sizeof(struct section_64), 0, false);
+void read_segment(struct MachoHandle* macho_handle, struct segment_command_64* segment_cmd, size_t* offset_to_read_segment) {
+    memcpy(segment_cmd, macho_handle->input_file->buffer + *offset_to_read_segment, sizeof(struct segment_command_64));
+    *offset_to_read_segment += sizeof(struct segment_command_64);
 }
 
-struct SegmentHandle* build_segment_handle(struct MachoHandle* macho_handle) {
+
+void read_section(struct MachoHandle* macho_handle, struct section_64* section_cmd, size_t* offset_to_read_section) {
+    memcpy(section_cmd, macho_handle->input_file->buffer + *offset_to_read_section, sizeof(struct section_64));
+    *offset_to_read_section += sizeof(struct section_64);
+}
+
+struct SegmentHandle* build_segment_handle(struct MachoHandle* macho_handle, size_t* offset_to_read_segment) {
+    // build_segment_handle is always called when reading a segment, when reading all load commands,
+    // if the load command happens to be a LC_SEGMENT then this function will be called.
+    // But in that case, we are already determined that the command was in fact a LC_SEGMENT, so that means
+    // we are read the cmd and cmdsize fields of the corresponding struct segment_command_64
+    // To account for that we subtract this amount (both cmd and cmdsize are uint32_t)to the offset_to_read_segment parameter,
+    // to read the struct correctly.
+    *offset_to_read_segment -= (sizeof(uint32_t) + sizeof(uint32_t));
     struct SegmentHandle* segment_handle = malloc(sizeof(struct SegmentHandle));
     struct segment_command_64 load_cmd;
-    read_segment(macho_handle, &load_cmd);
+    read_segment(macho_handle, &load_cmd, offset_to_read_segment);
     segment_handle->segment_name = malloc(sizeof(uint8_t) * LENGHT_NAME);
     strcpy(segment_handle->segment_name, load_cmd.segname);
     segment_handle->load_cmd = load_cmd;
@@ -263,10 +253,11 @@ struct SegmentHandle* build_segment_handle(struct MachoHandle* macho_handle) {
 }
 
 
-struct SectionHandle* build_section_handle(struct MachoHandle* macho_handle, struct SegmentHandle* segment_handle) {
+struct SectionHandle* build_section_handle(struct MachoHandle* macho_handle,
+                                            struct SegmentHandle* segment_handle, size_t* offset_to_read_section) {
     struct SectionHandle* section_handle = malloc(sizeof(struct SectionHandle));
     struct section_64 section_cmd;
-    read_section(macho_handle, &section_cmd);
+    read_section(macho_handle, &section_cmd, offset_to_read_section);
     section_handle->section_name = malloc(sizeof(uint8_t) * LENGHT_NAME);
     strcpy(section_handle->section_name, section_cmd.sectname);
     section_handle->section_cmd = section_cmd;
@@ -303,17 +294,47 @@ struct SectionHelper** get_raw_data_from_sections(struct MachoHandle* handle)
 }
 */
 
-struct MachoHandle* build_macho_handle(FILE* fptr) {
+size_t get_input_file_size(FILE* fptr) {
+    fseek(fptr, 0L, SEEK_END);
+    size_t size = ftell(fptr);
+    rewind(fptr);
+    return size;
+}
+
+struct MachoHandle* build_macho_handle(FILE* fptr, char* filename) {
     struct MachoHandle* macho_handle = (struct MachoHandle*)malloc(sizeof(struct MachoHandle));
 
     macho_handle->fptr = fptr;
     macho_handle->segments = new_vector_of_segments();
 
-    size_t items_read = fread(&(macho_handle->header), sizeof(struct mach_header_64), 1, macho_handle->fptr );
-    if (items_read != 1) {
-        printf("fread failed while reading the mach header.\n");
+    macho_handle->input_file = malloc(sizeof(struct InputFile));
+    macho_handle->input_file->fptr = macho_handle->fptr;
+    macho_handle->input_file->filename = calloc(strlen(filename), sizeof(uint8_t));
+	strcpy(macho_handle->input_file->filename, filename);
+    macho_handle->input_file->filesize = get_input_file_size(macho_handle->fptr);
+    macho_handle->input_file->buffer = calloc(macho_handle->input_file->filesize, sizeof(uint8_t));
+
+    // We'll move the fptr so we need to save its value
+    long saved_fptr = ftell(macho_handle->fptr);
+    size_t items_read = fread(macho_handle->input_file->buffer, sizeof(uint8_t), macho_handle->input_file->filesize, macho_handle->fptr );
+    if (items_read != macho_handle->input_file->filesize) {
+        printf("fread failed while reading the entire file.\n");
         exit(1);
     }
+    // Restore the value of the fptr
+    if (fseek(macho_handle->fptr, saved_fptr, SEEK_SET) != 0) printf("fseek error\n");
+
+    //items_read = fread(&(macho_handle->header), sizeof(struct mach_header_64), 1, macho_handle->fptr );
+    //if (items_read != 1) {
+    //    printf("fread failed while reading the mach header.\n");
+    //    exit(1);
+    //}
+    if (fseek(macho_handle->fptr, sizeof(struct mach_header_64), SEEK_SET) != 0) printf("fseek error\n");
+
+    uint8_t* buffer = macho_handle->input_file->buffer;
+    size_t offset_to_read_from_buffer = 0;
+    memcpy(&macho_handle->header, buffer+offset_to_read_from_buffer, sizeof(struct mach_header_64));
+    offset_to_read_from_buffer += sizeof(struct mach_header_64);
 
     switch (macho_handle->header.filetype) {
         case MH_OBJECT:
@@ -332,12 +353,21 @@ struct MachoHandle* build_macho_handle(FILE* fptr) {
 
     macho_handle->load_commands = malloc(macho_handle->header.sizeofcmds);
 
+    //printf("offset_to_read_from_buffer antes de ciclar es: %zu\n", offset_to_read_from_buffer);
+
     // loader.h -> "The load commands directly follow the mach_header[...]"
-    
     for (size_t i = 0; i < macho_handle->header.ncmds; i++) {
-        uint32_t cmd = 0, cmdsize; // We initialize cmd with 0, so if after reading the value for it, if it keeps having the value 0, then there was an error.
-        get_cmd_and_cmdsize_of_load_command(macho_handle, &cmd, &cmdsize);
+        uint32_t cmd = 0, cmdsize = 0; // We initialize cmd with 0, so if after reading the value for it, if it keeps having the value 0, then there was an error.
+        //get_cmd_and_cmdsize_of_load_command(macho_handle, &cmd, &cmdsize);
         
+        get_cmd_and_cmdsize_of_load_command(macho_handle, &cmd, &cmdsize, &offset_to_read_from_buffer);
+        #if DEBUG
+        print_command_type(cmd);
+        printf("cmdsize: %d\n\n", cmdsize);
+        #endif
+
+        //printf("offset_to_read_from_buffer despues de leer una section: %zu\n", offset_to_read_from_buffer);
+
         if (cmd == 0) printf("error reading cmd\n");
         switch (cmd) {
             case LC_SYMTAB:
@@ -345,26 +375,48 @@ struct MachoHandle* build_macho_handle(FILE* fptr) {
                 //struct symtab_command* symtab = read_symtab(handle);
                 //build_symbols_handler(handle, symtab);
                 //free(symtab);
+                offset_to_read_from_buffer += cmdsize;
+                offset_to_read_from_buffer -= (sizeof(uint32_t) + sizeof(uint32_t));  // Subtract that we are already read the cmd and 
+                                                                                      // cmdsize fields so the offset was left advanced 
                 break;
             }
             case LC_SEGMENT_64:
             {
                 long saved_fptr = ftell(fptr);
-
-                struct SegmentHandle* segment_handle = build_segment_handle(macho_handle);
+                
+                struct SegmentHandle* segment_handle = build_segment_handle(macho_handle, &offset_to_read_from_buffer);
                 push_segment(macho_handle->segments, segment_handle);
                 // Right after the struct segment_command_64 there is the array containing all the sections defined in this segment. The number of them is given by:
                 // segment->nsects . Each entry of that array will be of type struct section_64. In there, each section will have its own size, so we'll read them using that size
                 // to move forward the fptr accordingly.
+                //printf("offset_to_read_from_buffer despues de leer un segment: %zu\n", offset_to_read_from_buffer);
+
+                //printf("segment_handle->load_cmd.nsects es: %d\n", segment_handle->load_cmd.nsects);
 
                 // We read all the struct segment_command_64, so the fptr is pointing to the end of the struct, exactly where the sections begin.
-                for (size_t i = 0; i < segment_handle->load_cmd.nsects; i++) {
+                for (size_t j = 0; j < segment_handle->load_cmd.nsects; j++) {
 
-                    struct SectionHandle* section_handle = build_section_handle(macho_handle, segment_handle);
+                    struct SectionHandle* section_handle = build_section_handle(macho_handle, segment_handle, &offset_to_read_from_buffer);
                     push_section(segment_handle->sections, section_handle);
+
+                    //printf("offset_to_read_from_buffer despues de leer una section: %zu\n", offset_to_read_from_buffer);
                     
                 }
-                if (fseek(macho_handle->fptr, saved_fptr, SEEK_SET) != 0) printf("fseek error\n");
+                //if (fseek(macho_handle->fptr, saved_fptr, SEEK_SET) != 0) printf("fseek error\n");
+                break;
+            }
+            case LC_BUILD_VERSION:
+            {
+                offset_to_read_from_buffer += cmdsize; // Because after the struct itself it may have other structs,
+                                                       // loader.h: " The list of known platforms and tool values following it."
+                
+                offset_to_read_from_buffer -= (sizeof(uint32_t) + sizeof(uint32_t));
+                break;
+            }
+            case LC_DYSYMTAB:
+            {
+                offset_to_read_from_buffer += cmdsize;
+                offset_to_read_from_buffer -= (sizeof(uint32_t) + sizeof(uint32_t));
                 break;
             }
             default:
@@ -375,7 +427,7 @@ struct MachoHandle* build_macho_handle(FILE* fptr) {
         }
 
         // loader.h -> "To advance to the next load command the cmdsize can be added to the offset or pointer of the current load command."
-        if (fseek(macho_handle->fptr, cmdsize, SEEK_CUR) != 0) printf("fseek error\n");
+        // if (fseek(macho_handle->fptr, cmdsize, SEEK_CUR) != 0) printf("fseek error\n");
 
     }
     //printf("Number of commands: %d\n", handle->header.ncmds);
@@ -384,9 +436,20 @@ struct MachoHandle* build_macho_handle(FILE* fptr) {
 }
 
 
+void get_data_from_sections(struct MachoHandle* macho_handle) {
+    for (size_t i = 0; i < get_size_of_vector_of_segments(macho_handle->segments); i++) {
+        struct SegmentHandle* segment_handle = get_segment_handle_at(macho_handle->segments, i);
+        for (size_t j = 0; j < get_size_of_vector_of_sections(segment_handle->sections); j++) {
+            struct SectionHandle* section_handle = get_section_handle_at(segment_handle->sections, j);
+            section_handle->raw_data_of_section = malloc(sizeof(uint8_t) * section_handle->section_cmd.size);
+            // write from the file starting at section_handle->section_cmd.offset
+
+            
+        }
+    }
+}
 
 /*
-
 
 ///////////// helpers . TODO: extract to separate files /////////////
 

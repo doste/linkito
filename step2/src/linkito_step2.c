@@ -1184,14 +1184,18 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 	FILE* fptr = open_macho_file(argv[1], "rb");
-	struct MachoHandle* macho_handle = build_macho_handle(fptr);
+	struct MachoHandle* macho_handle = build_macho_handle(fptr, argv[1]);
 	if (macho_handle->filetype != RelocatableObjectFile) {
 		printf("Error: Only relocatable object files supported\n");
 		exit(1);
 	}
 
+	#if DEBUG
 	printf("Debugging...\n");
+	print_file_type(macho_handle);
+	print_load_commands(macho_handle);
 	print_segments_and_sections(macho_handle);
+	#endif
 
 	//FILE* file_ptr = generate_handwritten_executable_file();
 	

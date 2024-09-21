@@ -76,11 +76,20 @@ struct SymbolsHandle {
 
 typedef enum {RelocatableObjectFile, ExecutableFile, DynamicLibrary} macho_filetype;
 
+struct InputFile {
+    char* filename;
+    size_t filesize;
+	FILE* fptr;
+	uint8_t* buffer;
+};
+
 // Each MachoHandle will corresponds to each Mach-o file we are processing
 struct MachoHandle {
     FILE* fptr;
     struct mach_header_64 header;
     macho_filetype filetype;
+    struct InputFile* input_file;
+
 
     void* load_commands;
 
@@ -94,19 +103,19 @@ struct MachoHandle {
 FILE* open_macho_file(const char *pathname, const char *mode);
 
 
-void get_cmd_and_cmdsize_of_load_command(struct MachoHandle* handle, uint32_t* cmd, uint32_t* cmdsize);
+void get_cmd_and_cmdsize_of_load_command(struct MachoHandle* handle, uint32_t* cmd, uint32_t* cmdsize, size_t* offset);
 
 //char* build_string_table(struct MachoHandle* handle, struct symtab_command* symtab);
 //void build_symbols_handler(struct MachoHandle* handle, struct symtab_command* symtab);
 //struct symtab_command* read_symtab(struct MachoHandle* handle);
 
-void read_segment(struct MachoHandle* handle, struct segment_command_64* segment_cmd) ;
-void read_section(struct MachoHandle* handle, struct section_64* section_cmd);
+void read_segment(struct MachoHandle* handle, struct segment_command_64* segment_cmd, size_t* offset_to_read_segment);
+void read_section(struct MachoHandle* handle, struct section_64* section_cmd, size_t* offset_to_read_section);
 
 //uint8_t* get_raw_data_from_section(struct MachoHandle* handle, struct section_64* section);
 //struct SectionHelper** get_raw_data_from_sections(struct MachoHandle* handle);
 
-struct MachoHandle* build_macho_handle(FILE* fptr);
+struct MachoHandle* build_macho_handle(FILE* fptr, char* filename);
 
 
 
