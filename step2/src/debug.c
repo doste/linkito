@@ -220,3 +220,87 @@ void print_load_commands(struct MachoHandle* macho_handle) {
     printf("The file %s has %d load commands\n", macho_handle->input_file->filename, macho_handle->header.ncmds);
 }
 
+/*
+loader.h: "The file type MH_OBJECT is a compact format intended as output of the
+            assembler and input (and possibly output) of the link editor (the .o
+            format).  All sections are in one unnamed segment with no segment padding."
+Whaaat!? Ok, so as now we are dealing with object files (no executables) as input, so that means
+we don't actually have a segment name for each section. 
+So in the following function we only search for a section with name 'section_name' without taking into account
+its segment.
+*/
+void dump_raw_data_of_section_to_file(struct MachoHandle* macho_handle, char* section_name) {
+
+    char filename[32];
+    strcpy(filename, "../bin/");
+    strcat(filename, section_name);
+    strcat(filename, "_DUMP");
+    FILE* fptr_out = fopen(filename, "wb+");
+    if (!fptr_out) {
+		fprintf(stderr, "Error while creating file.\n");
+		exit(1);
+	}
+
+    for (size_t i = 0; i < get_size_of_vector_of_segments(macho_handle->segments); i++) {
+        
+        struct SegmentHandle* segment_handle = get_segment_handle_at(macho_handle->segments, i);
+
+            for (size_t j = 0; j < get_size_of_vector_of_sections(segment_handle->sections); j++) {
+                
+                uint8_t* buffer = macho_handle->input_file->buffer;
+                struct SectionHandle* section_handle = get_section_handle_at(segment_handle->sections, j);
+            
+                if (strcmp(section_handle->section_name, section_name) == 0) {
+                    
+                    size_t written = fwrite(section_handle->raw_data_of_section,
+                                            sizeof(uint8_t),
+                                            section_handle->section_cmd.size,
+                                            fptr_out);
+                    if (written < section_handle->section_cmd.size) {
+                        fprintf(stderr, "Error while dumping the raw data of the section %s into the file.\n", section_name);
+                        exit(1);
+                    }
+                }
+            }
+        
+    }
+}
+
+
+void dump_raw_data_of_section_in_segment_to_file(struct SegmentHandle* segment_handle, char* section_name, char* id) {
+
+    char filename[48];
+    strcpy(filename, "../bin/");
+    strcat(filename, section_name);
+    strcat(filename, "_DUMP");
+    strcat(filename, id);
+    FILE* fptr_out = fopen(filename, "wb+");
+    if (!fptr_out) {
+		fprintf(stderr, "Error while creating file.\n");
+		exit(1);
+	}
+
+    for (size_t j = 0; j < get_size_of_vector_of_sections(segment_handle->sections); j++) {
+        
+        struct SectionHandle* section_handle = get_section_handle_at(segment_handle->sections, j);
+    
+        if (strcmp(section_handle->section_name, section_name) == 0) {
+
+            if (!section_handle->raw_data_of_section) {
+                fprintf(stderr, "DEBUG: Error Section handle of %s has no raw data.\n", section_name);
+                exit(1);
+            }
+            
+            size_t written = fwrite(section_handle->raw_data_of_section,
+                                    sizeof(uint8_t),
+                                    section_handle->section_cmd.size,
+                                    fptr_out);
+            if (written < section_handle->section_cmd.size) {
+                fprintf(stderr, "Error while dumping the raw data of the section %s into the file.\n", section_name);
+                exit(1);
+            }
+        }
+    }
+        
+    
+}

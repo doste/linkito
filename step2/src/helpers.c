@@ -4,6 +4,19 @@
 #include <errno.h>
 
 
+FILE* create_file(char* filename)
+{	
+	FILE* file_ptr = fopen(filename, "wb+");
+	return file_ptr;
+}
+
+size_t get_input_file_size(FILE* fptr) {
+    fseek(fptr, 0L, SEEK_END);
+    size_t size = ftell(fptr);
+    rewind(fptr);
+    return size;
+}
+
 int64_t min(int64_t x, int64_t y) {
 	return x < y ? x : y;
 }

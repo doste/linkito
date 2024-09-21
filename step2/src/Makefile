@@ -13,7 +13,7 @@ all: ../bin/small_c_program.o ../bin/linkito
 #	cc macho_parser.c -Wall -o ../bin/macho_parser
 
 ../bin/linkito: linkito_step2.c helpers.c debug.c
-	cc linkito_step2.c helpers.c macho_parser.c debug.c -Wall -o ../bin/linkito   #-fuse-ld=mold
+	cc linkito_step2.c helpers.c macho_parser.c debug.c writer.c builder.c -g -Wall -o ../bin/linkito   #-fuse-ld=mold
 	
 tester: tester.c
 	cc tester.c -o ../bin/test

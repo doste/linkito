@@ -19,28 +19,32 @@
 #include "../include/helpers.h"
 #include "../include/macho_parser.h"
 #include "../include/debug.h"
+#include "../include/writer.h"
+#include "../include/builder.h"
 
-
-// Write a "linker" that takes no input and produces the file header and the sections as binary blobs which are identical to the smallest executable.
 
 /*
-	The idea then is to 'hand-write' the small_c_program executable
+This step is actually the fourth:
+4. Once the blobs are eliminated, improve the code so that it can take a single
+   input object file with the empty `main` to produce the same output.
+
+So now, in this step what we are doing is generating the same file we receive as input, 
+*but* of course doing it 'dynamically' not hardcoding it like we did in step1.
+
+The design I'm thinking is something like this:
+
+    [macho_parser]  	----------->    [ builder ]	----------->   [writer]
+
+	Takes input files,				Builds segments and				Finally write the output file (an executable)
+	build the corresponding         sections
+	structures for each
+	(one MachoHandle for
+	each mach-o input file).
+
+
+
 */
 
-
-struct OutputFile {
-	char* filename;
-	size_t filesize;
-	FILE* fptr;
-	uint8_t* buffer;
-	size_t total_size_for_load_cmds;
-};
-
-FILE* create_file(char* filename)
-{	
-	FILE* file_ptr = fopen(filename, "wb+");
-	return file_ptr;
-}
 
 // 			********** Header ********** 
 
@@ -117,7 +121,7 @@ struct load_command {
 */
 
 
-/*
+/*		Step2: This should remain the same.
 Load command 0
 	  cmd LC_SEGMENT_64
   cmdsize 72
@@ -168,7 +172,10 @@ Load command 1
    nsects 2
 	flags 0x0
 */
-void write_load_command_one(struct OutputFile* output_file, size_t* file_offset, size_t* offset_of_exec_segment, size_t*size_of_exec_segment)
+void write_load_command_one(struct OutputFile* output_file,
+							size_t* file_offset,
+							size_t* offset_of_exec_segment,
+							size_t*size_of_exec_segment)
 {
 	uint8_t* buf = output_file->buffer + *file_offset;
 	memset(buf, 0, sizeof(struct segment_command_64));
@@ -192,6 +199,7 @@ void write_load_command_one(struct OutputFile* output_file, size_t* file_offset,
 	*size_of_exec_segment = load_command_one->filesize;
 	output_file->total_size_for_load_cmds += load_command_one->cmdsize;
 }
+
 
 /*
 Section
@@ -1190,12 +1198,37 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 
+	printf("macho_header mide: %zu\n", sizeof(struct mach_header_64));
+
+	assign_raw_data_to_each_section(macho_handle);
+
 	#if DEBUG
 	printf("Debugging...\n");
 	print_file_type(macho_handle);
 	print_load_commands(macho_handle);
 	print_segments_and_sections(macho_handle);
+	dump_raw_data_of_section_to_file(macho_handle, "__text");
+	dump_raw_data_of_section_to_file(macho_handle, "__compact_unwind__LD");
 	#endif
+
+	struct Builder* builder = new_builder();
+	//struct SegmentHandle* input_text_segment = get_segment_handle_with_segment_name(macho_handle->segments, SEG_TEXT);
+	// For some reason the __TEXT segment in relocatable object files doesn't have its name set
+	// But we know it's the first one so:
+	struct SegmentHandle* input_text_segment = get_segment_handle_at(macho_handle->segments, 0);
+	if (!input_text_segment) {
+		fprintf(stderr, "Main: Error getting the %s segment\n", SEG_TEXT);
+		exit(1);
+	}
+	builder_set_input_text_segment_handle(builder, input_text_segment);
+	
+	if (!build_segment_text(builder)) {
+		fprintf(stderr, "Main: Error while building the output text segment\n");
+		exit(1);
+	}
+
+
+	struct OutputFile* output_file = writer_generate_executable_file("my_own_small_exec", builder);
 
 	//FILE* file_ptr = generate_handwritten_executable_file();
 	

@@ -12,18 +12,26 @@
 #include <sys/errno.h>
 #include "../include/macho_parser.h"
 #include "../include/debug.h"
-
+#include "../include/helpers.h"
 
 //  *** Section ***
 struct VectorOfSections* new_vector_of_sections(void) {
     struct VectorOfSections* vec = malloc(sizeof(struct VectorOfSections));
-    vec->size = 0;                                                                      // this size is going to be used as index. Specifically as index in the array of sections for
-                                                                                        // a segment, and this array starts at 1. So we initiliaze size with 1.
+    vec->size = 0;                                                                                                                                            
     vec->capacity = 4;
     vec->sections = malloc(vec->capacity * sizeof(struct SectionHandle*));
-
     return vec;
 }
+
+struct VectorOfSections* new_vector_of_sections_of_size(size_t size) {
+    struct VectorOfSections* vec = malloc(sizeof(struct VectorOfSections));
+    vec->size = 0;                                                                                                                                            
+    vec->capacity = size;
+    vec->sections = malloc(vec->capacity * sizeof(struct SectionHandle*));
+    return vec;
+ }
+
+
 void push_section(struct VectorOfSections* vector_of_sections, struct SectionHandle* section_handle) {
 
     if (vector_of_sections->size >= vector_of_sections->capacity) {
@@ -45,6 +53,17 @@ struct SectionHandle* get_section_handle_at(struct VectorOfSections* vector_of_s
     }
     return vector_of_sections->sections[idx];
 }
+
+struct SectionHandle* get_section_handle_with_section_name(struct VectorOfSections* vector_of_sections, char* section_name) {
+    for (size_t i = 0; i < get_size_of_vector_of_sections(vector_of_sections); i++) {
+        struct SectionHandle* sect_handle = get_section_handle_at(vector_of_sections, i);
+        if (strcmp(sect_handle->section_name, section_name) == 0) {
+            return sect_handle;
+        }
+    }
+    return NULL;
+}
+
 
 
 //  *** Segment ***
@@ -78,6 +97,18 @@ struct SegmentHandle* get_segment_handle_at(struct VectorOfSegments* vector_of_s
     }
     return vector_of_segments->segments[idx];
 }
+
+struct SegmentHandle* get_segment_handle_with_segment_name(struct VectorOfSegments* vector_of_segments, char* segment_name) {
+    for (size_t i = 0; i < get_size_of_vector_of_segments(vector_of_segments); i++) {
+        struct SegmentHandle* seg_handle = get_segment_handle_at(vector_of_segments, i);
+        if (strcmp(seg_handle->segment_name, segment_name) == 0) {
+            return seg_handle;
+        }
+    }
+    return NULL;
+}
+
+/////
 
 FILE* open_macho_file(const char *pathname, const char *mode) {
     FILE*  fptr = fopen(pathname, mode);
@@ -267,39 +298,7 @@ struct SectionHandle* build_section_handle(struct MachoHandle* macho_handle,
     return section_handle;
 }
 
-/*
-uint8_t* get_raw_data_from_section(struct MachoHandle* handle, struct section_64* section)
-{
-    uint8_t* raw_data = malloc(section->size * sizeof(uint8_t));
-    read_struct_from_file(handle->fptr, raw_data,section->size, section->offset, true);
-    return raw_data;
-}
 
-
-struct SectionHelper** get_raw_data_from_sections(struct MachoHandle* handle)
-{
-    struct SectionHelper** sections_helpers = malloc(handle->sections->size * sizeof(struct SectionHelper*));
-
-    for (size_t i = 0; i < handle->sections->size ; i++) {
-        struct section_64* section_i = handle->sections->sections[i];
-
-        struct SectionHelper* section_helper_i = malloc(sizeof(struct SectionHelper));
-        *section_helper_i = (struct SectionHelper){.raw_data_of_section = get_raw_data_from_section(handle, section_i),
-                                                    .section = section_i};
-
-        sections_helpers[i] = section_helper_i;
-    }
-
-    return sections_helpers;
-}
-*/
-
-size_t get_input_file_size(FILE* fptr) {
-    fseek(fptr, 0L, SEEK_END);
-    size_t size = ftell(fptr);
-    rewind(fptr);
-    return size;
-}
 
 struct MachoHandle* build_macho_handle(FILE* fptr, char* filename) {
     struct MachoHandle* macho_handle = (struct MachoHandle*)malloc(sizeof(struct MachoHandle));
@@ -353,22 +352,14 @@ struct MachoHandle* build_macho_handle(FILE* fptr, char* filename) {
 
     macho_handle->load_commands = malloc(macho_handle->header.sizeofcmds);
 
-    //printf("offset_to_read_from_buffer antes de ciclar es: %zu\n", offset_to_read_from_buffer);
-
     // loader.h -> "The load commands directly follow the mach_header[...]"
     for (size_t i = 0; i < macho_handle->header.ncmds; i++) {
-        uint32_t cmd = 0, cmdsize = 0; // We initialize cmd with 0, so if after reading the value for it, if it keeps having the value 0, then there was an error.
-        //get_cmd_and_cmdsize_of_load_command(macho_handle, &cmd, &cmdsize);
-        
+        uint32_t cmd, cmdsize;
         get_cmd_and_cmdsize_of_load_command(macho_handle, &cmd, &cmdsize, &offset_to_read_from_buffer);
         #if DEBUG
         print_command_type(cmd);
         printf("cmdsize: %d\n\n", cmdsize);
         #endif
-
-        //printf("offset_to_read_from_buffer despues de leer una section: %zu\n", offset_to_read_from_buffer);
-
-        if (cmd == 0) printf("error reading cmd\n");
         switch (cmd) {
             case LC_SYMTAB:
             {
@@ -389,9 +380,6 @@ struct MachoHandle* build_macho_handle(FILE* fptr, char* filename) {
                 // Right after the struct segment_command_64 there is the array containing all the sections defined in this segment. The number of them is given by:
                 // segment->nsects . Each entry of that array will be of type struct section_64. In there, each section will have its own size, so we'll read them using that size
                 // to move forward the fptr accordingly.
-                //printf("offset_to_read_from_buffer despues de leer un segment: %zu\n", offset_to_read_from_buffer);
-
-                //printf("segment_handle->load_cmd.nsects es: %d\n", segment_handle->load_cmd.nsects);
 
                 // We read all the struct segment_command_64, so the fptr is pointing to the end of the struct, exactly where the sections begin.
                 for (size_t j = 0; j < segment_handle->load_cmd.nsects; j++) {
@@ -399,7 +387,6 @@ struct MachoHandle* build_macho_handle(FILE* fptr, char* filename) {
                     struct SectionHandle* section_handle = build_section_handle(macho_handle, segment_handle, &offset_to_read_from_buffer);
                     push_section(segment_handle->sections, section_handle);
 
-                    //printf("offset_to_read_from_buffer despues de leer una section: %zu\n", offset_to_read_from_buffer);
                     
                 }
                 //if (fseek(macho_handle->fptr, saved_fptr, SEEK_SET) != 0) printf("fseek error\n");
@@ -421,30 +408,32 @@ struct MachoHandle* build_macho_handle(FILE* fptr, char* filename) {
             }
             default:
             {
-                //printf("Unknown cmd %d\n", cmd);
-                //return NULL;
+                printf("Unknown cmd %d\n", cmd);
             }
         }
 
         // loader.h -> "To advance to the next load command the cmdsize can be added to the offset or pointer of the current load command."
-        // if (fseek(macho_handle->fptr, cmdsize, SEEK_CUR) != 0) printf("fseek error\n");
-
     }
-    //printf("Number of commands: %d\n", handle->header.ncmds);
 
     return macho_handle;
 }
 
 
-void get_data_from_sections(struct MachoHandle* macho_handle) {
+void assign_raw_data_to_each_section(struct MachoHandle* macho_handle) {
+
     for (size_t i = 0; i < get_size_of_vector_of_segments(macho_handle->segments); i++) {
+
         struct SegmentHandle* segment_handle = get_segment_handle_at(macho_handle->segments, i);
+
         for (size_t j = 0; j < get_size_of_vector_of_sections(segment_handle->sections); j++) {
+            
+            uint8_t* buffer = macho_handle->input_file->buffer;
             struct SectionHandle* section_handle = get_section_handle_at(segment_handle->sections, j);
             section_handle->raw_data_of_section = malloc(sizeof(uint8_t) * section_handle->section_cmd.size);
-            // write from the file starting at section_handle->section_cmd.offset
-
-            
+            // read from the file starting at section_handle->section_cmd.offset
+            memcpy(section_handle->raw_data_of_section,
+                            buffer + section_handle->section_cmd.offset,
+                            section_handle->section_cmd.size);
         }
     }
 }
@@ -491,29 +480,7 @@ void get_objc_classes(struct MachoHandle* handle) {
     }
 }
 */
-void read_struct_from_file(FILE* fptr, void* struct_itself, size_t size_of_struct, long offset_to_start_reading, bool restore_fptr) {
 
-    long saved_fptr = ftell(fptr);
-
-    // Move the fptr to the corresponding offset
-    if (offset_to_start_reading != 0) {
-
-       fseek(fptr, offset_to_start_reading, SEEK_SET);
-    }
-    size_t items_read;
-
-    items_read = 0;
-    items_read = fread(struct_itself, size_of_struct, 1, fptr);
-
-    assert(items_read == 1);
-
-    // Restore the value of the fptr according to the argument
-    if (restore_fptr) {
-        if (fseek(fptr, saved_fptr, SEEK_SET) != 0) printf("fseek error\n");
-    }
-
-
-}
 
 
 
