@@ -13,29 +13,18 @@
 #include <set>
 #include <optional>
 #include "Common.h"
+#include "LoadCommands.h"
 
    
 class Macho {
     friend class Debugger;
+    friend class Tester;
     
     public:
         Macho(char* filename, const char* pathname);
-        void buildSegmentCommands();
-        void buildSegmentCommandsDEP();   // X
-        void buildLinkeditDataCommands(); 
-        void buildLinkeditDataCommandsDEP(); // X
 
-        void buildBuildVersionLoadCommand();
-        void buildBuildVersionLoadCommandDEP(); // X
         void buildLoadCommands();
 
-        void buildSymbolTable();
-        void buildStringTable();
-        void assignPayloadsToSections();
-        void assignPayloadsToLinkeditBlobs();
-
-        //void buildLoadCommandsMemoryRegion();
-        //LoadCommandsRegion load_commands; // This should be private, now only to test it
 
     private:
     
@@ -43,16 +32,37 @@ class Macho {
         macho_filetype filetype;
         File file;
 
-        //LoadCommandsRegion load_commands;
         SymbolTable symtab;
-        std::vector<SegmentHandle> segment_commands;
-        std::vector<LinkeditCommandWithPayload> linkedit_data;
-        BuildVersion build_version;
+        std::vector<SegmentHandle*> segment_handles;
+        std::vector<LinkeditDataCommandHandle*> linkedit_data_handles;
+        BuildVersionHandle* build_version_handle;
+        LoadDyLinkerCommandHandle* load_dylinker_handle;
+        EntryPointCommandHandle* entry_point_handle;
+        UuidCommandCommandHandle* uuid_handle;
+        SourceVersionCommandHandle* source_version_handle;
+        LoadDylibCommandHandle* load_dylib_handle;
+        LoadCommandsRegion load_commands_mem_region;
 
-        std::vector<std::string> getSegmentLoadCommandsPresentInTheMap();
 
         void buildLoadCommandsMemoryRegion();
-        LoadCommandsRegion load_commands;
+        std::vector<std::string> getSegmentLoadCommandsPresentInTheMap();
+
+        // Building of load commands. Each of these is called by buildLoadCommands().
+        void buildBuildVersionLoadCommand();
+        void buildSymbolTable();
+        void buildStringTable();
+        void buildSegmentCommands();
+        void buildLinkeditDataCommands();
+        void buildDyLinkerCommand();
+        void buildEntryPointCommand();
+        void buildUuidCommand();
+        void buildSourceVersionCommand();
+        void buildLoadDylibCommandHandle();
+
+        void assignPayloadsToSections();
+        void assignPayloadsToLinkeditBlobs();
+
+
 
 };
 

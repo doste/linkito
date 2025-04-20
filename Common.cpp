@@ -1,10 +1,10 @@
 #include "Common.h"
+#include "LoadCommands.h"
 
 File::File() : filename(nullptr), filesize(0), fptr(nullptr) {}
 
 File::File(char* filename, size_t filesize, FILE* fptr) :
          filename(filename), filesize(filesize), fptr(fptr) {}
-         //strcpy(macho_handle->file->filename, filename);
 
 size_t File::get_file_size(FILE* fptr) {
     fseek(fptr, 0L, SEEK_END);
@@ -68,44 +68,6 @@ SymbolType get_own_symbol_table_entry_type(uint8_t n_type) {
             exit(1);
         }
 }
-
-StringTable::StringTable() {
-    this->entries = std::vector<StringTableEntry>();
-}
-
-SymbolTable::SymbolTable() {
-    this->entries = std::vector<SymbolTableEntry>();
-}
-
-size_t SymbolTable::get_symbol_table_size() {
-    return this->entries.size() * sizeof(SymbolTableEntry);
-}
-
-
-SegmentHandle::SegmentHandle() {
-    this->segcmd = nullptr;
-    this->sections = std::vector<SectionWithPayload>();
-}
-
-LinkeditCommandWithPayload::LinkeditCommandWithPayload() {
-    this->command = nullptr;
-	this->payload = nullptr;
-}
-
-BuildVersion::BuildVersion() {
-    this->command = nullptr;
-    this->tool_versions = std::vector<struct build_tool_version>();
-}
-
-
-OffsetAndSize::OffsetAndSize() {}
-OffsetAndSize::OffsetAndSize(uint32_t offset, uint32_t size) : offset(offset), size(size) {}
-
-LoadCommandsRegion::LoadCommandsRegion() {
-    this->region = nullptr;
-	this->offsets = std::map<std::string, OffsetAndSize>();
-}
-
 
 
 ////////////////////////////////////////////////////

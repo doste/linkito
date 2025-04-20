@@ -14,7 +14,7 @@ void Debugger::testLoadCommandsMemoryRegionIsBuiltCorrectly(Macho macho) {
         exit(1);
     }
     // Compare it with the memory region:
-    if (memcmp(load_commands, macho.load_commands.region, macho.header.sizeofcmds) == 0) {
+    if (memcmp(load_commands, macho.load_commands_mem_region.region, macho.header.sizeofcmds) == 0) {
         std::cout << "Test passed" << std::endl;
     } else {
         std::cout << "Test failed" << std::endl;
@@ -36,22 +36,22 @@ void dumpRawDataToFile(void* data, uint32_t offset, uint32_t size, char* filenam
 }
 
 void Debugger::dumpLoadCommandsMemoryRegionToFile(Macho macho, uint32_t offset, uint32_t size) {
-    dumpRawDataToFile(macho.load_commands.region, offset, size, "BuildVersion_LoadCommandMemoryRegion_DUMP");
+    dumpRawDataToFile(macho.load_commands_mem_region.region, offset, size, "BuildVersion_LoadCommandMemoryRegion_DUMP");
 }
 
 void Debugger::dumpWholeLoadCommandsMemoryRegionToFile(Macho macho) {
-    dumpRawDataToFile(macho.load_commands.region, 0, macho.header.sizeofcmds, "WholeLoadCommandMemoryRegion_DUMP");
+    dumpRawDataToFile(macho.load_commands_mem_region.region, 0, macho.header.sizeofcmds, "WholeLoadCommandMemoryRegion_DUMP");
 }
 
 void Debugger::dumpBuildVersionCommandToFile(Macho macho) {
-    size_t command_size = macho.build_version.command->cmdsize - (sizeof(struct build_tool_version) * macho.build_version.command->ntools);
-    dumpRawDataToFile(macho.build_version.command, 0, command_size, "BuildVersion_DUMP");
+    size_t command_size = macho.build_version_handle->load_command->cmdsize - (sizeof(struct build_tool_version) * macho.build_version_handle->load_command->ntools);
+    dumpRawDataToFile(macho.build_version_handle->load_command, 0, command_size, "BuildVersion_DUMP");
 }
 
 void Debugger::dumpTextSectionToFile(Macho macho) {
     
-    for (SegmentHandle segment : macho.segment_commands) {
-        for (SectionWithPayload sect : segment.sections) {
+    for (SegmentHandle* segment : macho.segment_handles) {
+        for (SectionWithPayload sect : segment->sections) {
             if (strcmp(sect.section->sectname, SECT_TEXT) == 0) {
                 if (sect.payload) {
                     dumpRawDataToFile(sect.payload, 0, sect.section->size, "TextSection_DUMP");
@@ -63,20 +63,20 @@ void Debugger::dumpTextSectionToFile(Macho macho) {
 
 
 void Debugger::dumpLinkeditPayloadsToFile(Macho macho) {
-    for (LinkeditCommandWithPayload linkedit_data : macho.linkedit_data) {
-        if (linkedit_data.payload) {
-            dumpRawDataToFile(linkedit_data.payload, 0, linkedit_data.command->datasize, "LinkeditPayloads_DUMP");
+    for (LinkeditDataCommandHandle* linkedit_data : macho.linkedit_data_handles) {
+        if (linkedit_data->payload) {
+            dumpRawDataToFile(linkedit_data->payload, 0, linkedit_data->load_command->datasize, "LinkeditPayloads_DUMP");
         }
     }
 }
 
 void Debugger::debugSegmentCommands(Macho macho) {
     std::cout << "Segment commands:" << std::endl;
-    for (SegmentHandle seg : macho.segment_commands) {
-        std::cout << seg.segcmd->segname << std::endl;
-        if (seg.segcmd->nsects != 0) {
+    for (SegmentHandle* seg : macho.segment_handles) {
+        std::cout << seg->load_command->segname << std::endl;
+        if (seg->load_command->nsects != 0) {
             std::cout << "  With sections:" << std::endl;
-            for (SectionWithPayload sect : seg.sections) {
+            for (SectionWithPayload sect : seg->sections) {
                 std::cout << "      " <<sect.section->sectname << std::endl;
             }
         }

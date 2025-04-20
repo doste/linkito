@@ -5,6 +5,7 @@
 #include <iostream>
 #include "Macho.h"
 #include "Debugger.h"
+#include "Tester.h"
 
 
 
@@ -19,6 +20,8 @@ int main(int argc, char** argv) {
     Macho macho = Macho(input_filename, input_filename);
 
     Debugger debugger = Debugger();
+    Tester tester = Tester();
+
     //debugger.debugMacho(macho);
 
     macho.buildLoadCommands();
@@ -36,6 +39,9 @@ int main(int argc, char** argv) {
     //debugger.dumpWholeLoadCommandsMemoryRegionToFile(macho);
 
     debugger.testLoadCommandsMemoryRegionIsBuiltCorrectly(macho);
+
+
+    tester.printLoadCommands(macho);
 
 
     return 0;
