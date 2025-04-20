@@ -2,24 +2,6 @@
 #include <unistd.h>
 
 
-void Debugger::testLoadCommandsMemoryRegionIsBuiltCorrectly(Macho macho) {
-    Byte* load_commands = (Byte*)malloc(sizeof(Byte) * macho.header.sizeofcmds);
-
-    // Obtain the load commands from the file itself:
-    FILE* fptr = open_macho_file(macho.file.filename);
-    fseek(fptr, sizeof(struct mach_header_64), SEEK_SET);
-    size_t items_read = fread(load_commands, macho.header.sizeofcmds, 1, fptr);
-    if (items_read != 1) {
-        fprintf(stderr, "Error while reading Mach-o load commands.\n");
-        exit(1);
-    }
-    // Compare it with the memory region:
-    if (memcmp(load_commands, macho.load_commands_mem_region.region, macho.header.sizeofcmds) == 0) {
-        std::cout << "Test passed" << std::endl;
-    } else {
-        std::cout << "Test failed" << std::endl;
-    }
-}
 
 void dumpRawDataToFile(void* data, uint32_t offset, uint32_t size, char* filename) {
     FILE* fptr_out = fopen(filename, "wb+");
@@ -51,10 +33,10 @@ void Debugger::dumpBuildVersionCommandToFile(Macho macho) {
 void Debugger::dumpTextSectionToFile(Macho macho) {
     
     for (SegmentHandle* segment : macho.segment_handles) {
-        for (SectionWithPayload sect : segment->sections) {
-            if (strcmp(sect.section->sectname, SECT_TEXT) == 0) {
-                if (sect.payload) {
-                    dumpRawDataToFile(sect.payload, 0, sect.section->size, "TextSection_DUMP");
+        for (SectionHandle* sect : segment->sections) {
+            if (strcmp(sect->section->sectname, SECT_TEXT) == 0) {
+                if (sect->payload) {
+                    dumpRawDataToFile(sect->payload, 0, sect->section->size, "TextSection_DUMP");
                 }
             }
         }
@@ -76,8 +58,8 @@ void Debugger::debugSegmentCommands(Macho macho) {
         std::cout << seg->load_command->segname << std::endl;
         if (seg->load_command->nsects != 0) {
             std::cout << "  With sections:" << std::endl;
-            for (SectionWithPayload sect : seg->sections) {
-                std::cout << "      " <<sect.section->sectname << std::endl;
+            for (SectionHandle* sect : seg->sections) {
+                std::cout << "      " <<sect->section->sectname << std::endl;
             }
         }
     }

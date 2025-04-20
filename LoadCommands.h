@@ -302,6 +302,13 @@ struct DySymTabCommand : LoadCommand {
 	uint32_t nlocrel;			// number of local relocation entries
 };
 
+struct DySymTabHandle : LoadCommandHandle {
+	DySymTabCommand* load_command;
+
+	DySymTabHandle();
+	virtual void print() const;
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -365,15 +372,19 @@ struct Section64 {
 	uint32_t	reserved3;		// reserved 
 };
 
-struct SectionWithPayload {
+// (Section64 is not a LoadCommand)
+struct SectionHandle {
 	Section64* section;
 	Byte* payload;
+
+    SectionHandle();
+	void print() const;
 };
 
 
 struct SegmentHandle : LoadCommandHandle {
 	SegmentCommand64* load_command;
-	std::vector<SectionWithPayload> sections;
+	std::vector<SectionHandle*> sections;
 
     char* segname;     // Easier to access.
 

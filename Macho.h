@@ -14,17 +14,17 @@
 #include <optional>
 #include "Common.h"
 #include "LoadCommands.h"
-
    
 class Macho {
     friend class Debugger;
     friend class Tester;
+    friend class ExecutableFileBuilder;
+    friend class MachoParser;
     
     public:
+        
+        Macho();
         Macho(char* filename, const char* pathname);
-
-        void buildLoadCommands();
-
 
     private:
     
@@ -32,7 +32,12 @@ class Macho {
         macho_filetype filetype;
         File file;
 
+        // The Macho object itself is not responsible for setting all the following fields.
+        // In the case of an input Macho, the MachoParser will be responsible for setting them up.
+        // In the case of an output Macho, it will be the ExecutableFileBuilder.
+        // The idea is that a Macho object can be used as both input or output.
         SymbolTable symtab;
+        DySymTabHandle* dysymtab_handle;
         std::vector<SegmentHandle*> segment_handles;
         std::vector<LinkeditDataCommandHandle*> linkedit_data_handles;
         BuildVersionHandle* build_version_handle;
@@ -42,28 +47,6 @@ class Macho {
         SourceVersionCommandHandle* source_version_handle;
         LoadDylibCommandHandle* load_dylib_handle;
         LoadCommandsRegion load_commands_mem_region;
-
-
-        void buildLoadCommandsMemoryRegion();
-        std::vector<std::string> getSegmentLoadCommandsPresentInTheMap();
-
-        // Building of load commands. Each of these is called by buildLoadCommands().
-        void buildBuildVersionLoadCommand();
-        void buildSymbolTable();
-        void buildStringTable();
-        void buildSegmentCommands();
-        void buildLinkeditDataCommands();
-        void buildDyLinkerCommand();
-        void buildEntryPointCommand();
-        void buildUuidCommand();
-        void buildSourceVersionCommand();
-        void buildLoadDylibCommandHandle();
-
-        void assignPayloadsToSections();
-        void assignPayloadsToLinkeditBlobs();
-
-
-
 };
 
 #endif

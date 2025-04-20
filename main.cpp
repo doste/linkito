@@ -3,9 +3,10 @@
 #include <cerrno>
 #include <assert.h>
 #include <iostream>
-#include "Macho.h"
+//#include "Macho.h"
 #include "Debugger.h"
 #include "Tester.h"
+#include "MachoParser.h"
 
 
 
@@ -22,9 +23,11 @@ int main(int argc, char** argv) {
     Debugger debugger = Debugger();
     Tester tester = Tester();
 
+    MachoParser parser = MachoParser(macho);
+
     //debugger.debugMacho(macho);
 
-    macho.buildLoadCommands();
+    parser.buildLoadCommands();
 
     //debugger.debugSymbolTable(macho);
     //debugger.debugStringTable(macho);
@@ -38,10 +41,9 @@ int main(int argc, char** argv) {
 
     //debugger.dumpWholeLoadCommandsMemoryRegionToFile(macho);
 
-    debugger.testLoadCommandsMemoryRegionIsBuiltCorrectly(macho);
+    tester.testLoadCommandsMemoryRegionIsBuiltCorrectly(parser.macho);
+    //tester.printLoadCommands(macho);
 
-
-    tester.printLoadCommands(macho);
 
 
     return 0;

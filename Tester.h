@@ -5,7 +5,8 @@
 
 class Tester {
     public:
-        void printLoadCommands(Macho macho);
+        void testLoadCommandsMemoryRegionIsBuiltCorrectly(Macho);
+        void printLoadCommands(Macho);
 };
 
 #endif
