@@ -17,6 +17,13 @@ void dumpRawDataToFile(void* data, uint32_t offset, uint32_t size, char* filenam
     }
 }
 
+void Debugger::dumpMemoryBlockToFile(ExecutableFileBuilder file_builder) {
+    dumpRawDataToFile(file_builder.mem_reg_manager.block_of_memory,
+        0,
+        file_builder.mem_reg_manager.offset_and_size_of_block.size,
+        "ExecutableFileMemoryRegion_DUMP");
+}
+
 void Debugger::dumpLoadCommandsMemoryRegionToFile(Macho macho, uint32_t offset, uint32_t size) {
     dumpRawDataToFile(macho.load_commands_mem_region.region, offset, size, "BuildVersion_LoadCommandMemoryRegion_DUMP");
 }

@@ -4,6 +4,7 @@
 #include <iostream>
 #include "Common.h"
 #include "Macho.h"
+#include "ExecutableFileBuilder.h"
 
 class Debugger {
     public:
@@ -19,6 +20,9 @@ class Debugger {
 
         void dumpWholeLoadCommandsMemoryRegionToFile(Macho macho);
         void dumpLoadCommandsMemoryRegionToFile(Macho macho, uint32_t offset, uint32_t size);
+
+
+        void dumpMemoryBlockToFile(ExecutableFileBuilder file_builder);
 
 
 

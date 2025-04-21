@@ -44,6 +44,12 @@ int main(int argc, char** argv) {
     tester.testLoadCommandsMemoryRegionIsBuiltCorrectly(parser.macho);
     //tester.printLoadCommands(macho);
 
+    MemoryRegionManager mem_reg_manager = MemoryRegionManager();
+    ExecutableFileBuilder builder = ExecutableFileBuilder(macho, mem_reg_manager);
+    builder.buildExecutableFile();
+
+    
+    debugger.dumpMemoryBlockToFile(builder);
 
 
     return 0;

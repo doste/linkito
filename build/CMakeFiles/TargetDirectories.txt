@@ -1,0 +1,3 @@
+/Users/juanignaciobianchi/devdev/linkito++/build/CMakeFiles/linkito.dir
+/Users/juanignaciobianchi/devdev/linkito++/build/CMakeFiles/edit_cache.dir
+/Users/juanignaciobianchi/devdev/linkito++/build/CMakeFiles/rebuild_cache.dir
