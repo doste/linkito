@@ -66,7 +66,7 @@ void DySymTabHandle::print() const {
 
 SegmentHandle::SegmentHandle() {
     this->load_command = nullptr;
-    this->segname = nullptr;
+    this->segname = {};
     this->sections = std::vector<SectionHandle*>();
 }
 
@@ -93,7 +93,7 @@ void SegmentHandle::print() const {
 //////////////////////////////////////
 
 SectionHandle::SectionHandle() {
-    this->section = nullptr;
+    this->section = new Section64();
     this->payload = nullptr;
 }
 
@@ -116,7 +116,7 @@ void SectionHandle::print() const {
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 LinkeditDataCommandHandle::LinkeditDataCommandHandle() {
-    this->load_command = nullptr;
+    this->load_command = new LinkeditDataCommand();
 	this->payload = nullptr;
 }
 
@@ -126,6 +126,33 @@ void LinkeditDataCommandHandle::print() const {
     std::cout << " dataoff "    << this->load_command->dataoff  << std::endl;
     std::cout << " datasize "   << this->load_command->datasize  << std::endl; 
 }
+
+
+DyldChainedFixupsCommandHandle::DyldChainedFixupsCommandHandle() {
+    this->load_command = new DyldChainedFixupsCommand();
+	this->payload = nullptr;
+}
+
+FunctionStartsCommandHandle::FunctionStartsCommandHandle() {
+    this->load_command = new FunctionStartsCommand();
+	this->payload = nullptr;
+}
+
+DataInCodeCommandHandle::DataInCodeCommandHandle() {
+    this->load_command = new DataInCodeCommand();
+	this->payload = nullptr;
+}
+
+CodeSignatureCommandHandle::CodeSignatureCommandHandle() {
+    this->load_command = new CodeSignatureCommand();
+	this->payload = nullptr;
+}
+
+ExportsTrieCommandHandle::ExportsTrieCommandHandle() {
+    this->load_command = new ExportsTrieCommand();
+	this->payload = nullptr;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -153,7 +180,7 @@ void BuildVersionHandle::print() const {
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 OffsetAndSize::OffsetAndSize() {}
-OffsetAndSize::OffsetAndSize(uint32_t offset, uint32_t size) : offset(offset), size(size) {}
+OffsetAndSize::OffsetAndSize(uint64_t offset, uint64_t size) : offset(offset), size(size) {}
 
 LoadCommandsRegion::LoadCommandsRegion() {
     this->region = nullptr;

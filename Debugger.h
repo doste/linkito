@@ -22,7 +22,9 @@ class Debugger {
         void dumpLoadCommandsMemoryRegionToFile(Macho macho, uint32_t offset, uint32_t size);
 
 
-        void dumpMemoryBlockToFile(ExecutableFileBuilder file_builder);
+        void dumpUpperMemoryRegionToFile(ExecutableFileBuilder file_builder);
+        void dumpLowerMemoryRegionToFile(ExecutableFileBuilder file_builder);
+        void dumpWholeFileToFile(ExecutableFileBuilder file_builder);
 
 
 

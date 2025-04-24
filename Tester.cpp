@@ -25,29 +25,29 @@ void Tester::printLoadCommands(Macho macho) {
     std::vector<LoadCommandHandle*> all_handles;
 
     // Awfully inefficient but this way we make sure it's the same order as 'otool -l' (first PAGEZERO, then TEXT finally LINKEDIT)
-    for (SegmentHandle* segment_handle : macho.segment_handles) {
-        if (strcmp(segment_handle->segname, SEG_PAGEZERO) == 0) {
+    for (SegmentHandle* segment_handle : *macho.segment_handles) {
+        if (segment_handle->segname == SEG_PAGEZERO) {
             all_handles.push_back(segment_handle);
         }
     }
-    for (SegmentHandle* segment_handle : macho.segment_handles) {
-        if (strcmp(segment_handle->segname, SEG_TEXT) == 0) {
+    for (SegmentHandle* segment_handle : *macho.segment_handles) {
+        if (segment_handle->segname == SEG_TEXT) {
             all_handles.push_back(segment_handle);
         }
     }
-    for (SegmentHandle* segment_handle : macho.segment_handles) {
-        if (strcmp(segment_handle->segname, SEG_LINKEDIT) == 0) {
+    for (SegmentHandle* segment_handle : *macho.segment_handles) {
+        if (segment_handle->segname == SEG_LINKEDIT) {
             all_handles.push_back(segment_handle);
         }
     }
 
-    for (LinkeditDataCommandHandle* linkedit_data_handle : macho.linkedit_data_handles) {
+    for (LinkeditDataCommandHandle* linkedit_data_handle : *macho.linkedit_data_handles) {
         if (linkedit_data_handle->load_command->cmd == LC_DYLD_CHAINED_FIXUPS) {
             all_handles.push_back(linkedit_data_handle);
         } 
     }
 
-    for (LinkeditDataCommandHandle* linkedit_data_handle : macho.linkedit_data_handles) {
+    for (LinkeditDataCommandHandle* linkedit_data_handle : *macho.linkedit_data_handles) {
         if (linkedit_data_handle->load_command->cmd == LC_DYLD_EXPORTS_TRIE) {
             all_handles.push_back(linkedit_data_handle);
         } 
@@ -61,17 +61,17 @@ void Tester::printLoadCommands(Macho macho) {
     all_handles.push_back(macho.source_version_handle);
     all_handles.push_back(macho.entry_point_handle);
     all_handles.push_back(macho.load_dylib_handle);
-    for (LinkeditDataCommandHandle* linkedit_data_handle : macho.linkedit_data_handles) {
+    for (LinkeditDataCommandHandle* linkedit_data_handle : *macho.linkedit_data_handles) {
         if (linkedit_data_handle->load_command->cmd == LC_FUNCTION_STARTS) {
             all_handles.push_back(linkedit_data_handle);
         } 
     }
-    for (LinkeditDataCommandHandle* linkedit_data_handle : macho.linkedit_data_handles) {
+    for (LinkeditDataCommandHandle* linkedit_data_handle : *macho.linkedit_data_handles) {
         if (linkedit_data_handle->load_command->cmd == LC_DATA_IN_CODE) {
             all_handles.push_back(linkedit_data_handle);
         } 
     }
-    for (LinkeditDataCommandHandle* linkedit_data_handle : macho.linkedit_data_handles) {
+    for (LinkeditDataCommandHandle* linkedit_data_handle : *macho.linkedit_data_handles) {
         if (linkedit_data_handle->load_command->cmd == LC_CODE_SIGNATURE) {
             all_handles.push_back(linkedit_data_handle);
         } 

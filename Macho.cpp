@@ -2,10 +2,14 @@
 #include <set>
 #include <tuple>
 
-Macho::Macho() {}
+Macho::Macho() {
+    this->segment_handles = new std::vector<SegmentHandle*>();
+    this->linkedit_data_handles = new std::vector<LinkeditDataCommandHandle*>();
+}
 
-Macho::Macho(char* filename, const char* pathname) {
-    FILE* fptr = open_macho_file(pathname);
+
+Macho::Macho(char* filename) {
+    FILE* fptr = open_macho_file(filename);
     read_macho_header(fptr, &this->header);
     switch (this->header.filetype) {
         case MH_OBJECT:
@@ -24,11 +28,20 @@ Macho::Macho(char* filename, const char* pathname) {
 
     this->file = File(filename, File::get_file_size(fptr), fptr);
     this->file.fill_buffer();
-    this->segment_handles = std::vector<SegmentHandle*>();
-    this->linkedit_data_handles = std::vector<LinkeditDataCommandHandle*>();
+    this->segment_handles = new std::vector<SegmentHandle*>();
+    this->linkedit_data_handles = new std::vector<LinkeditDataCommandHandle*>();
 
     //this->buildLoadCommandsMemoryRegion();
     
+}
+
+SegmentHandle* Macho::getSegmentHandleForSegmentNamed(std::string segname) {
+    for (SegmentHandle* seg : *this->segment_handles) {
+        if (seg->segname == segname) {
+            return seg;
+        }
+    }
+    return nullptr;
 }
 
 

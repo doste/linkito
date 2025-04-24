@@ -17,11 +17,25 @@ void dumpRawDataToFile(void* data, uint32_t offset, uint32_t size, char* filenam
     }
 }
 
-void Debugger::dumpMemoryBlockToFile(ExecutableFileBuilder file_builder) {
-    dumpRawDataToFile(file_builder.mem_reg_manager.block_of_memory,
+void Debugger::dumpLowerMemoryRegionToFile(ExecutableFileBuilder file_builder) {
+    dumpRawDataToFile(file_builder.mem_reg_manager->lowerMemoryRegion->data,
         0,
-        file_builder.mem_reg_manager.offset_and_size_of_block.size,
-        "ExecutableFileMemoryRegion_DUMP");
+        file_builder.mem_reg_manager->lowerMemoryRegion->offset_and_size.size,
+        "ExecutableFileLowerMemoryRegion_DUMP");
+}
+
+void Debugger::dumpUpperMemoryRegionToFile(ExecutableFileBuilder file_builder) {
+    dumpRawDataToFile(file_builder.mem_reg_manager->upperMemoryRegion->data,
+        0,
+        file_builder.mem_reg_manager->upperMemoryRegion->offset_and_size.size,
+        "ExecutableFileUpperMemoryRegion_DUMP");
+}
+
+void Debugger::dumpWholeFileToFile(ExecutableFileBuilder file_builder) {
+    dumpRawDataToFile(file_builder.wholeFile,
+        0,
+        PAGE_SIZE,
+        "ExecutableFileWholeFile_DUMP");
 }
 
 void Debugger::dumpLoadCommandsMemoryRegionToFile(Macho macho, uint32_t offset, uint32_t size) {
@@ -39,7 +53,7 @@ void Debugger::dumpBuildVersionCommandToFile(Macho macho) {
 
 void Debugger::dumpTextSectionToFile(Macho macho) {
     
-    for (SegmentHandle* segment : macho.segment_handles) {
+    for (SegmentHandle* segment : *macho.segment_handles) {
         for (SectionHandle* sect : segment->sections) {
             if (strcmp(sect->section->sectname, SECT_TEXT) == 0) {
                 if (sect->payload) {
@@ -52,7 +66,7 @@ void Debugger::dumpTextSectionToFile(Macho macho) {
 
 
 void Debugger::dumpLinkeditPayloadsToFile(Macho macho) {
-    for (LinkeditDataCommandHandle* linkedit_data : macho.linkedit_data_handles) {
+    for (LinkeditDataCommandHandle* linkedit_data : *macho.linkedit_data_handles) {
         if (linkedit_data->payload) {
             dumpRawDataToFile(linkedit_data->payload, 0, linkedit_data->load_command->datasize, "LinkeditPayloads_DUMP");
         }
@@ -61,7 +75,7 @@ void Debugger::dumpLinkeditPayloadsToFile(Macho macho) {
 
 void Debugger::debugSegmentCommands(Macho macho) {
     std::cout << "Segment commands:" << std::endl;
-    for (SegmentHandle* seg : macho.segment_handles) {
+    for (SegmentHandle* seg : *macho.segment_handles) {
         std::cout << seg->load_command->segname << std::endl;
         if (seg->load_command->nsects != 0) {
             std::cout << "  With sections:" << std::endl;

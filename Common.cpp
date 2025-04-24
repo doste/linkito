@@ -1,6 +1,12 @@
 #include "Common.h"
 #include "LoadCommands.h"
 
+uint64_t align_to(uint64_t val, uint64_t align) {
+    if (align == 0)
+      return val;
+    return (val + align - 1) & ~(align - 1);
+  }
+
 File::File() : filename(nullptr), filesize(0), fptr(nullptr) {}
 
 File::File(char* filename, size_t filesize, FILE* fptr) :

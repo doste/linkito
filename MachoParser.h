@@ -7,14 +7,13 @@ class MachoParser {
     
     public:
         MachoParser();
-        MachoParser(Macho macho);
+        MachoParser(char* filename);
 
         void buildLoadCommands();
 
-        Macho macho; // SHOULD BE PRIVATEEE, now only to test
+        Macho* macho;
 
     private:
-        //Macho macho;
 
         void buildLoadCommandsMemoryRegion();
         std::vector<std::string> getSegmentLoadCommandsPresentInTheMap();

@@ -18,12 +18,12 @@ int main(int argc, char** argv) {
 	}
 	
 	char* input_filename = argv[1];
-    Macho macho = Macho(input_filename, input_filename);
+    //Macho macho = Macho(input_filename, input_filename);
 
     Debugger debugger = Debugger();
     Tester tester = Tester();
 
-    MachoParser parser = MachoParser(macho);
+    MachoParser parser = MachoParser(input_filename);
 
     //debugger.debugMacho(macho);
 
@@ -41,15 +41,18 @@ int main(int argc, char** argv) {
 
     //debugger.dumpWholeLoadCommandsMemoryRegionToFile(macho);
 
-    tester.testLoadCommandsMemoryRegionIsBuiltCorrectly(parser.macho);
+    tester.testLoadCommandsMemoryRegionIsBuiltCorrectly(*parser.macho);
     //tester.printLoadCommands(macho);
 
-    MemoryRegionManager mem_reg_manager = MemoryRegionManager();
-    ExecutableFileBuilder builder = ExecutableFileBuilder(macho, mem_reg_manager);
+    ExecutableFileBuilder builder = ExecutableFileBuilder(*parser.macho);
     builder.buildExecutableFile();
 
-    
-    debugger.dumpMemoryBlockToFile(builder);
+
+    //debugger.dumpLowerMemoryRegionToFile(builder);
+    debugger.dumpWholeFileToFile(builder);
+
+    builder.debugMemoryRegionManager();
+
 
 
     return 0;

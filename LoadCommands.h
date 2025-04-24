@@ -6,11 +6,11 @@
 
 
 struct OffsetAndSize {
-	uint32_t offset;
-    uint32_t size;
+	uint64_t offset;
+    uint64_t size;
 
 	OffsetAndSize();
-	OffsetAndSize(uint32_t, uint32_t);
+	OffsetAndSize(uint64_t, uint64_t);
 };
 
 // The offsets dict gives us for a given Load Command, the offset and the size in the memory region.
@@ -40,6 +40,7 @@ struct LoadCommand {
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 struct LoadCommandHandle {
+    LoadCommand* load_command;
 
 	LoadCommandHandle();
 	virtual void print() const = 0;
@@ -375,7 +376,7 @@ struct Section64 {
 // (Section64 is not a LoadCommand)
 struct SectionHandle {
 	Section64* section;
-	Byte* payload;
+	Byte* payload;      // The size of this payload is given by section->size
 
     SectionHandle();
 	void print() const;
@@ -386,7 +387,8 @@ struct SegmentHandle : LoadCommandHandle {
 	SegmentCommand64* load_command;
 	std::vector<SectionHandle*> sections;
 
-    char* segname;     // Easier to access.
+    //char* segname;     // Easier to access.
+    std::string segname;
 
 	SegmentHandle();
 	virtual void print() const;
@@ -423,6 +425,41 @@ struct LinkeditDataCommandHandle : LoadCommandHandle {
 
 	LinkeditDataCommandHandle();
 	virtual void print() const;
+};
+
+struct DyldChainedFixupsCommand : LinkeditDataCommand {};
+struct DyldChainedFixupsCommandHandle : LinkeditDataCommandHandle {
+    DyldChainedFixupsCommand* load_command;
+
+    DyldChainedFixupsCommandHandle();
+};
+
+struct FunctionStartsCommand : LinkeditDataCommand {};
+struct FunctionStartsCommandHandle : LinkeditDataCommandHandle {
+    FunctionStartsCommand* load_command;
+
+    FunctionStartsCommandHandle();
+};
+
+struct DataInCodeCommand : LinkeditDataCommand {};
+struct DataInCodeCommandHandle : LinkeditDataCommandHandle {
+    DataInCodeCommand* load_command;
+
+    DataInCodeCommandHandle();
+};
+
+struct CodeSignatureCommand : LinkeditDataCommand {};
+struct CodeSignatureCommandHandle : LinkeditDataCommandHandle {
+    CodeSignatureCommand* load_command;
+
+    CodeSignatureCommandHandle();
+};
+
+struct ExportsTrieCommand : LinkeditDataCommand {};
+struct ExportsTrieCommandHandle : LinkeditDataCommandHandle {
+    ExportsTrieCommand* load_command;
+
+    ExportsTrieCommandHandle();
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////

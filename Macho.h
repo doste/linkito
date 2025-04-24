@@ -24,7 +24,9 @@ class Macho {
     public:
         
         Macho();
-        Macho(char* filename, const char* pathname);
+        Macho(char* filename);
+
+        SegmentHandle* getSegmentHandleForSegmentNamed(std::string segname);
 
     private:
     
@@ -38,8 +40,8 @@ class Macho {
         // The idea is that a Macho object can be used as both input or output.
         SymbolTable symtab;
         DySymTabHandle* dysymtab_handle;
-        std::vector<SegmentHandle*> segment_handles;
-        std::vector<LinkeditDataCommandHandle*> linkedit_data_handles;
+        std::vector<SegmentHandle*>* segment_handles;
+        std::vector<LinkeditDataCommandHandle*>* linkedit_data_handles;
         BuildVersionHandle* build_version_handle;
         LoadDyLinkerCommandHandle* load_dylinker_handle;
         EntryPointCommandHandle* entry_point_handle;
