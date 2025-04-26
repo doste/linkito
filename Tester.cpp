@@ -1,6 +1,7 @@
 #include "Tester.h"
 
 
+
 void Tester::testLoadCommandsMemoryRegionIsBuiltCorrectly(Macho macho) {
     Byte* load_commands = (Byte*)malloc(sizeof(Byte) * macho.header.sizeofcmds);
 
@@ -14,9 +15,9 @@ void Tester::testLoadCommandsMemoryRegionIsBuiltCorrectly(Macho macho) {
     }
     // Compare it with the memory region:
     if (memcmp(load_commands, macho.load_commands_mem_region.region, macho.header.sizeofcmds) == 0) {
-        std::cout << "Test passed" << std::endl;
+        std::cout << "Test passed for Macho file: " << macho.file.filename << std::endl;
     } else {
-        std::cout << "Test failed" << std::endl;
+        std::cout << "Test failed for Macho file: " << macho.file.filename << std::endl;
     }
 }
 

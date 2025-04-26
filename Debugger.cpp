@@ -3,7 +3,7 @@
 
 
 
-void dumpRawDataToFile(void* data, uint32_t offset, uint32_t size, char* filename) {
+void Debugger::dumpRawDataToFile(void* data, uint32_t offset, uint32_t size, char* filename) {
     FILE* fptr_out = fopen(filename, "wb+");
     if (!fptr_out) {
         fprintf(stderr, "can't open %s: %s\n", filename, strerror(errno));
@@ -18,37 +18,37 @@ void dumpRawDataToFile(void* data, uint32_t offset, uint32_t size, char* filenam
 }
 
 void Debugger::dumpLowerMemoryRegionToFile(ExecutableFileBuilder file_builder) {
-    dumpRawDataToFile(file_builder.mem_reg_manager->lowerMemoryRegion->data,
+    this->dumpRawDataToFile(file_builder.mem_reg_manager->lowerMemoryRegion->data,
         0,
         file_builder.mem_reg_manager->lowerMemoryRegion->offset_and_size.size,
         "ExecutableFileLowerMemoryRegion_DUMP");
 }
 
 void Debugger::dumpUpperMemoryRegionToFile(ExecutableFileBuilder file_builder) {
-    dumpRawDataToFile(file_builder.mem_reg_manager->upperMemoryRegion->data,
+    this->dumpRawDataToFile(file_builder.mem_reg_manager->upperMemoryRegion->data,
         0,
         file_builder.mem_reg_manager->upperMemoryRegion->offset_and_size.size,
         "ExecutableFileUpperMemoryRegion_DUMP");
 }
 
 void Debugger::dumpWholeFileToFile(ExecutableFileBuilder file_builder) {
-    dumpRawDataToFile(file_builder.wholeFile,
+    this->dumpRawDataToFile(file_builder.wholeFile,
         0,
         PAGE_SIZE,
         "ExecutableFileWholeFile_DUMP");
 }
 
 void Debugger::dumpLoadCommandsMemoryRegionToFile(Macho macho, uint32_t offset, uint32_t size) {
-    dumpRawDataToFile(macho.load_commands_mem_region.region, offset, size, "BuildVersion_LoadCommandMemoryRegion_DUMP");
+    this->dumpRawDataToFile(macho.load_commands_mem_region.region, offset, size, "BuildVersion_LoadCommandMemoryRegion_DUMP");
 }
 
 void Debugger::dumpWholeLoadCommandsMemoryRegionToFile(Macho macho) {
-    dumpRawDataToFile(macho.load_commands_mem_region.region, 0, macho.header.sizeofcmds, "WholeLoadCommandMemoryRegion_DUMP");
+    this->dumpRawDataToFile(macho.load_commands_mem_region.region, 0, macho.header.sizeofcmds, "WholeLoadCommandMemoryRegion_DUMP");
 }
 
 void Debugger::dumpBuildVersionCommandToFile(Macho macho) {
     size_t command_size = macho.build_version_handle->load_command->cmdsize - (sizeof(struct build_tool_version) * macho.build_version_handle->load_command->ntools);
-    dumpRawDataToFile(macho.build_version_handle->load_command, 0, command_size, "BuildVersion_DUMP");
+    this->dumpRawDataToFile(macho.build_version_handle->load_command, 0, command_size, "BuildVersion_DUMP");
 }
 
 void Debugger::dumpTextSectionToFile(Macho macho) {
@@ -57,7 +57,7 @@ void Debugger::dumpTextSectionToFile(Macho macho) {
         for (SectionHandle* sect : segment->sections) {
             if (strcmp(sect->section->sectname, SECT_TEXT) == 0) {
                 if (sect->payload) {
-                    dumpRawDataToFile(sect->payload, 0, sect->section->size, "TextSection_DUMP");
+                    this->dumpRawDataToFile(sect->payload, 0, sect->section->size, "TextSection_DUMP");
                 }
             }
         }
@@ -68,7 +68,7 @@ void Debugger::dumpTextSectionToFile(Macho macho) {
 void Debugger::dumpLinkeditPayloadsToFile(Macho macho) {
     for (LinkeditDataCommandHandle* linkedit_data : *macho.linkedit_data_handles) {
         if (linkedit_data->payload) {
-            dumpRawDataToFile(linkedit_data->payload, 0, linkedit_data->load_command->datasize, "LinkeditPayloads_DUMP");
+            this->dumpRawDataToFile(linkedit_data->payload, 0, linkedit_data->load_command->datasize, "LinkeditPayloads_DUMP");
         }
     }
 }

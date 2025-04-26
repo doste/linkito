@@ -122,9 +122,6 @@ void MachoParser::buildBuildVersionLoadCommand() {
 }
 
 
-// char* dylinker_name = "/usr/lib/dyld";
-// size_t dylinker_name_aligned_size = align_to(strlen(dylinker_name) + 1, 16);
-
 void MachoParser::buildDyLinkerCommand() {
     std::string key = macroToString[LC_LOAD_DYLINKER];
     Byte* buffer_to_read_from = this->macho->load_commands_mem_region.region;
@@ -132,15 +129,15 @@ void MachoParser::buildDyLinkerCommand() {
     uint32_t size_to_read = this->macho->load_commands_mem_region.offsets[key].size;
 
     this->macho->load_dylinker_handle = new LoadDyLinkerCommandHandle();
-    this->macho->load_dylinker_handle->load_command = new DyLinkerCommand();
+    this->macho->load_dylinker_handle->load_command = new LoadDyLinkerCommand();
 
     // First we copy the struct itself:
-    memcpy(this->macho->load_dylinker_handle->load_command, buffer_to_read_from + offset_to_read_from, sizeof(DyLinkerCommand));
+    memcpy(this->macho->load_dylinker_handle->load_command, buffer_to_read_from + offset_to_read_from, sizeof(LoadDyLinkerCommand));
 
     // And then for the pathname field , we need to access the field name.offset, this offset gives us the name (starting from the beginning of the struct dylinker_command)
-    uint32_t pathname_string_len = this->macho->load_dylinker_handle->load_command->cmdsize - sizeof(DyLinkerCommand); // Because cmdsize includes pathname string.
+    uint32_t pathname_string_len = this->macho->load_dylinker_handle->load_command->cmdsize - sizeof(LoadDyLinkerCommand); // Because cmdsize includes pathname string.
     this->macho->load_dylinker_handle->pathname = (char*)malloc(sizeof(char) * pathname_string_len);
-    memcpy(this->macho->load_dylinker_handle->pathname, buffer_to_read_from + offset_to_read_from + sizeof(DyLinkerCommand), pathname_string_len);
+    memcpy(this->macho->load_dylinker_handle->pathname, buffer_to_read_from + offset_to_read_from + sizeof(LoadDyLinkerCommand), pathname_string_len);
 }
 
 void MachoParser::buildEntryPointCommand() {
@@ -190,19 +187,19 @@ void MachoParser::buildLoadDylibCommandHandle() {
     uint32_t size_to_read = this->macho->load_commands_mem_region.offsets[key].size;
 
     this->macho->load_dylib_handle = new LoadDylibCommandHandle();
-    this->macho->load_dylib_handle->load_command = new DylibCommand();
+    this->macho->load_dylib_handle->load_command = new LoadDylibCommand();
 
     // First copy the struct dylib_command:
-    memcpy(this->macho->load_dylib_handle->load_command, buffer_to_read_from + offset_to_read_from, sizeof(DylibCommand));
+    memcpy(this->macho->load_dylib_handle->load_command, buffer_to_read_from + offset_to_read_from, sizeof(LoadDylibCommand));
     // And then the struct dylib, that is just after:
     uint32_t size_of_cmd_and_cmdsize_fields = sizeof(uint32_t) + sizeof(uint32_t);
     memcpy(&(this->macho->load_dylib_handle->load_command->dylib), buffer_to_read_from + offset_to_read_from + size_of_cmd_and_cmdsize_fields, sizeof(struct dylib));
 
     // Finally, the pathname, its offset with respect to the beginning of the struct DylibCommand is given by name.offset:
-    uint32_t library_pathname_string_len = this->macho->load_dylib_handle->load_command->cmdsize - sizeof(DylibCommand); // Because cmdsize includes pathname string.
+    uint32_t library_pathname_string_len = this->macho->load_dylib_handle->load_command->cmdsize - sizeof(LoadDylibCommand); // Because cmdsize includes pathname string.
     this->macho->load_dylib_handle->library_path_name = (char*)malloc(sizeof(char) * library_pathname_string_len);
     memcpy(this->macho->load_dylib_handle->library_path_name,
-            buffer_to_read_from + offset_to_read_from + sizeof(DylibCommand),
+            buffer_to_read_from + offset_to_read_from + sizeof(LoadDylibCommand),
             library_pathname_string_len);
 
 }

@@ -4,6 +4,7 @@
 
 LoadCommandHandle::LoadCommandHandle() {}
 
+
 StringTable::StringTable() {
     this->entries = std::vector<StringTableEntry>();
 }
@@ -251,5 +252,6 @@ void LoadDyLinkerCommandHandle::print() const {
     std::cout << "cmdsize "             << this->load_command->cmdsize << std::endl;
     std::cout << "name "                << this->pathname << " (offset " << this->load_command->name.offset << ")" << std::endl;
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////

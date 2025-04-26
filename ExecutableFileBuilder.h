@@ -68,13 +68,18 @@ class ExecutableFileBuilder {
         Byte* wholeFile;        // Temporarie. Just to test.
 
         void debugMemoryRegionManager();
+        void testLoadCommandsMemoryRegionIsBuiltCorrectly();
 
     private:
         Macho input_macho;
         MemoryRegionManager* mem_reg_manager;
         Macho output_macho;
 
-        void buildLoadCommand(LoadCommandHandle* load_command_handle, LoadCommand* load_command, uint32_t cmd);
+        void buildLoadCommand(LoadCommandHandle* load_command_handle, LoadCommand* load_command, uint32_t cmd, uint32_t cmdsize);
+        void buildLoadCommandAppendingDataJustAfterOffset(LoadCommandHandle* load_command_handle,
+                                                    LoadCommand* load_command,
+                                                    uint32_t cmd, uint32_t cmdsize,
+                                                    uint32_t ofsset_for_data, void* data_to_append, uint32_t size_of_data_to_append);
 
         void buildHeader();
         void buildSegments();

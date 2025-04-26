@@ -1,16 +1,22 @@
 #include "ExecutableFileBuilder.h"
 #include <algorithm>
 
+#include "Debugger.h"
+
 MemoryBlock::MemoryBlock() {}
 
 MemoryBlock::MemoryBlock(uint64_t size) {
-    this->data = (Byte*)malloc(sizeof(Byte) * size);
+    this->data = (Byte*)calloc(size, sizeof(Byte));
     this->offset_and_size = OffsetAndSize(0, size);
 }
 
+// If data is NULL, we fill the memory block with zeros.
 void MemoryBlock::fillMemoryBlock(void* data) {
-    assert(data != nullptr);
-    memcpy(this->data, data, this->offset_and_size.size);
+    if (!data) {
+        memset(this->data, 0, this->offset_and_size.size);
+    } else {
+        memcpy(this->data, data, this->offset_and_size.size);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -259,26 +265,70 @@ void ExecutableFileBuilder::buildTextSectionPayload() {
         }
     }
 }
+// This function is to build those LoadCommands that have some data that is next after the struct load command, for
+// example those who have a 'name' field, the string describing the name is in memory just after the load command.
+void ExecutableFileBuilder::buildLoadCommandAppendingDataJustAfterOffset(LoadCommandHandle* load_command_handle,
+                     LoadCommand* load_command,
+                     uint32_t cmd, uint32_t cmdsize,
+                     uint32_t load_command_size_with_no_data, void* data_to_append, uint32_t size_of_data_to_append) {
 
-void ExecutableFileBuilder::buildLoadCommand(LoadCommandHandle* load_command_handle, LoadCommand* load_command, uint32_t cmd) {
-
+    // loader.h : "The cmdsize for 32-bit architectures MUST be a multiple of 4 bytes and for 64-bit architectures MUST be a multiple
+    //            of 8 bytes (these are forever the maximum alignment of any load commands)"
+    uint32_t cmdsize_aligned = cmdsize;
+    if (cmdsize_aligned % 8 != 0) {
+        cmdsize_aligned = align_to(cmdsize, 8);
+    }
     load_command_handle->load_command = load_command;
     load_command->cmd = cmd;
-	load_command->cmdsize = sizeof(load_command);
+	load_command->cmdsize = cmdsize_aligned;
 
-    MemoryBlock* mem_block_for_load_command = new MemoryBlock(sizeof(load_command));
+    // MemoryBlock for the LoadCommand itself.
+    MemoryBlock* mem_block_for_load_command = new MemoryBlock(load_command_size_with_no_data); // load_command_size_with_no_data because usually cmdsize includes the size of the data that follows it,
+                                                                                               // and we want to add another MemoryBlock for that data.
     mem_block_for_load_command->fillMemoryBlock(load_command);
     this->mem_reg_manager->upperMemoryRegion->appendMemoryBlock(mem_block_for_load_command);
 
-    //std::cout << "mem_block_for_linkedit_data_lc cmd: " << macroToString[cmd] << " OFFSET: " << mem_block_for_linkedit_data_lc->offset_and_size.offset << std::endl;
-    //std::cout << "mem_block_for_linkedit_data_lc cmd: " << macroToString[cmd] << " SIZE: " << mem_block_for_linkedit_data_lc->offset_and_size.size << std::endl;
+    // MemoryBlock for the data that follows the LoadCommand.
+    MemoryBlock* mem_block_for_appended_data = new MemoryBlock(size_of_data_to_append);
+    mem_block_for_appended_data->fillMemoryBlock(data_to_append);
+    this->mem_reg_manager->upperMemoryRegion->appendMemoryBlock(mem_block_for_appended_data);
 
+    // We need to make sure that the LoadCommand ends up with a size multiple of 8. So, we add as much padding as we need:
+    uint32_t final_size_of_load_command = load_command_size_with_no_data + size_of_data_to_append; // The sum of the sizes of the two MemoryBlocks
+    if (cmdsize_aligned != final_size_of_load_command) {    // Then we need to add padding
+        uint32_t padding = cmdsize_aligned - final_size_of_load_command;
+        // Add a MemoryBlock just for the padding.
+        MemoryBlock* mem_block_for_padding= new MemoryBlock(padding);
+        mem_block_for_padding->fillMemoryBlock(nullptr);            // So it fills it with zeros
+        this->mem_reg_manager->upperMemoryRegion->appendMemoryBlock(mem_block_for_padding);
+    }
+    
+}
+
+void ExecutableFileBuilder::buildLoadCommand(LoadCommandHandle* load_command_handle, LoadCommand* load_command, uint32_t cmd, uint32_t cmdsize) {
+
+    // loader.h : "The cmdsize for 32-bit architectures MUST be a multiple of 4 bytes and for 64-bit architectures MUST be a multiple
+    //            of 8 bytes (these are forever the maximum alignment of any load commands)"
+    uint32_t cmdsize_aligned = cmdsize;
+    if (cmdsize_aligned % 8 != 0) {
+        cmdsize_aligned = align_to(cmdsize, 8);
+    }
+    load_command_handle->load_command = load_command;
+    load_command->cmd = cmd;
+	load_command->cmdsize = cmdsize_aligned;
+
+    MemoryBlock* mem_block_for_load_command = new MemoryBlock(load_command->cmdsize);
+    //MemoryBlock* mem_block_for_load_command = new MemoryBlock(sizeof(load_command)); // If there is something that needs to be written in memory after the LoadCommand,
+                                                                                     // it must be done by the caller of this function.
+                                                                                     // This MemoryBlock is for the LoadCommand only. 
+    mem_block_for_load_command->fillMemoryBlock(load_command);
+    this->mem_reg_manager->upperMemoryRegion->appendMemoryBlock(mem_block_for_load_command);
 }
 
 void ExecutableFileBuilder::buildLinkeditDataCommand(LinkeditDataCommandHandle* handle, LinkeditDataCommand* linkedit_data_load_command, uint32_t cmd) {
     linkedit_data_load_command->dataoff = 0; // ????				   // file offset of data in __LINKEDIT segment 
 	linkedit_data_load_command->datasize = 0; // ????				   // file size of data in __LINKEDIT segment
-    this->buildLoadCommand(handle, linkedit_data_load_command, cmd);
+    this->buildLoadCommand(handle, linkedit_data_load_command, cmd, sizeof(LinkeditDataCommand));
     
     this->output_macho.linkedit_data_handles->push_back(handle);
 }
@@ -315,6 +365,7 @@ void ExecutableFileBuilder::buildCodeSignatureCommand() {
     this->buildLinkeditDataCommand(code_signature_handle, code_signature_lc, LC_CODE_SIGNATURE);  	
 }
 
+// Unused (for now at least)
 void ExecutableFileBuilder::buildLinkeditDataCommands() {
     this->buildDyldChainedFixupsCommand();
     this->buildExportsTrieCommand();
@@ -356,7 +407,8 @@ void ExecutableFileBuilder::buildLinkeditSegment() {
     this->output_macho.segment_handles->push_back(output_linkedit_seg_handle);
 
     // Finally build each of the load commands that are associated with the LINKEDIT segment:
-    this->buildLinkeditDataCommands();
+    //this->buildLinkeditDataCommands();
+    // So we respect the order. Better do them separately in the main buildExecutableFile function.
 }
 
 /*
@@ -368,13 +420,13 @@ TODO: Modify uuid to be really random.
 void ExecutableFileBuilder::buildUuidCommand() {
     UuidCommandCommandHandle* uuid_command_handle = new UuidCommandCommandHandle();
     UuidCommand* uuid_lc = new UuidCommand();
-    
+
     Byte uuid[16] = {0x78, 0x81, 0xEE, 0x18, 0x51, 0x67, 0x40, 0xC5, 0x83, 0x43, 0x55, 0x9B, 0x3C, 0xE0, 0x1B, 0x1C};
 	uuid[6] = (uuid[6] & 0b00001111) | 0b01010000;
 	uuid[8] = (uuid[8] & 0b00111111) | 0b10000000;
 	memcpy(uuid_lc->uuid, uuid, 16 * sizeof(Byte));
 
-    this->buildLoadCommand(uuid_command_handle, uuid_lc, LC_UUID);
+    this->buildLoadCommand(uuid_command_handle, uuid_lc, LC_UUID, sizeof(UuidCommand));
     this->output_macho.uuid_handle = uuid_command_handle;
 }
 
@@ -413,27 +465,122 @@ void ExecutableFileBuilder::buildBuildVersionCommand() {
 void ExecutableFileBuilder::buildSourceVersionCommand() {
     SourceVersionCommandHandle* source_version_handle = new SourceVersionCommandHandle();
     SourceVersionCommand* source_version_lc = new SourceVersionCommand();
-    this->buildLoadCommand(source_version_handle, source_version_lc, LC_SOURCE_VERSION);
+    source_version_lc->version = 0;
+    this->buildLoadCommand(source_version_handle, source_version_lc, LC_SOURCE_VERSION, sizeof(SourceVersionCommand));
     this->output_macho.source_version_handle = source_version_handle;
 }
+
+size_t alignStringLengthToSixteen(char* a_string) {
+    return align_to(strlen(a_string) + 1, 16);
+}
+
+char* allocMemoryForPathnameAligned(char* pathname, size_t pathname_size_aligned) {
+    char* pathname_padded_with_zeros = (char*)calloc(pathname_size_aligned, sizeof(char));
+    memcpy(pathname_padded_with_zeros, pathname, strlen(pathname));
+    return pathname_padded_with_zeros;
+}
+
 void ExecutableFileBuilder::buildLoadDylibCommandHandle() {
-    
+    LoadDylibCommandHandle* load_dylib_handle = new LoadDylibCommandHandle();
+    LoadDylibCommand* load_dylib_lc = new LoadDylibCommand();
+       
+    size_t lib_system_path_name_size_aligned = alignStringLengthToSixteen(LIB_SYSTEM_PATH_NAME);
+    uint32_t cmdsize = sizeof(LoadDylibCommand) + lib_system_path_name_size_aligned;    
+    load_dylib_lc->dylib = (struct dylib) {.name.offset = sizeof(LoadDylibCommand), // the string corresponding to the name would be just after this struct,
+                                                                                    // so the offset would be the sum of the sizes of the following fields.
+                                                                                    // The offset is from the start of the load command structure! 
+                                                                                    // So that sum should include the whole struct (this struct dylib + struct LoadDylibCommand)
+                                            .timestamp = 2,   		       	// from https://www.unixtimestamp.com/ IDK
+                                            .current_version = (1345 << 16 | 120 << 8 | 2),
+                                            .compatibility_version = (1 << 16)
+    };	// the library identification
+
+    // The LIB_SYSTEM_PATH_NAME needs to appear in the memory after the load command:
+    char* lib_system_path_name_padded_with_zeros = allocMemoryForPathnameAligned(LIB_SYSTEM_PATH_NAME, lib_system_path_name_size_aligned);
+
+    this->buildLoadCommandAppendingDataJustAfterOffset(load_dylib_handle, load_dylib_lc,
+                                                        LC_LOAD_DYLIB, cmdsize, sizeof(LoadDylibCommand), 
+                                                        lib_system_path_name_padded_with_zeros, lib_system_path_name_size_aligned);
+
+
+    this->output_macho.load_dylib_handle = load_dylib_handle;
 }
 
 void ExecutableFileBuilder::buildDyLinkerCommand() {
 
+    LoadDyLinkerCommandHandle* load_dyld_handle = new LoadDyLinkerCommandHandle();
+    LoadDyLinkerCommand* load_dyld_lc = new LoadDyLinkerCommand();
+
+    size_t dyld_path_name_size_aligned = alignStringLengthToSixteen(DYLD_PATH_NAME);
+    uint32_t cmdsize = sizeof(LoadDyLinkerCommand) + dyld_path_name_size_aligned;   
+
+	load_dyld_lc->name.offset = sizeof(LoadDyLinkerCommand);   // Because cmdsize includes pathname string.
+
+    // The DYLD_PATH_NAME needs to appear in the memory after the load command:
+    char* dyld_path_name_padded_with_zeros = allocMemoryForPathnameAligned(DYLD_PATH_NAME, dyld_path_name_size_aligned);
+
+    this->buildLoadCommandAppendingDataJustAfterOffset(load_dyld_handle, load_dyld_lc,
+                                                        LC_LOAD_DYLINKER, cmdsize, sizeof(LoadDyLinkerCommand),
+                                                        dyld_path_name_padded_with_zeros, dyld_path_name_size_aligned);
+    this->output_macho.load_dylinker_handle = load_dyld_handle;
 }
+
 void ExecutableFileBuilder::buildEntryPointCommand() {
-
+    EntryPointCommandHandle* entry_point_handle = new EntryPointCommandHandle();
+    EntryPointCommand* entry_point_lc = new EntryPointCommand();
+    entry_point_lc->entryoff = 0;                                   // // file (__TEXT) offset of main()    TO BE UPDATED!!!
+    entry_point_lc->stacksize = 0;
+    this->buildLoadCommand(entry_point_handle, entry_point_lc, LC_MAIN, sizeof(EntryPointCommand));
+    this->output_macho.entry_point_handle = entry_point_handle;
 }
+
 void ExecutableFileBuilder::buildSymbolTable() {
+    this->output_macho.symtab = SymbolTable();
+    this->output_macho.symtab.symtab_command_handle = new SymTabCommandHandle();
+    this->output_macho.symtab.symtab_command_handle->load_command = new SymTabCommand();
 
+    // TO BE UPDATED!!!
+    this->output_macho.symtab.symtab_command_handle->load_command->symoff = 0;
+    this->output_macho.symtab.symtab_command_handle->load_command->nsyms = 0;
+    this->output_macho.symtab.symtab_command_handle->load_command->stroff = 0;
+    this->output_macho.symtab.symtab_command_handle->load_command->strsize = 0;
+
+    this->buildLoadCommand(this->output_macho.symtab.symtab_command_handle,
+                            this->output_macho.symtab.symtab_command_handle->load_command, LC_SYMTAB,
+                            sizeof(SymTabCommand));
 }
+
 void ExecutableFileBuilder::buildDySymbolTable() {
+    this->output_macho.dysymtab_handle = new DySymTabHandle();
+    this->output_macho.dysymtab_handle->load_command = new DySymTabCommand();
 
+    // TO BE UPDATED!!!
+	this->output_macho.dysymtab_handle->load_command->ilocalsym = 0;
+	this->output_macho.dysymtab_handle->load_command->nlocalsym  = 0;
+	this->output_macho.dysymtab_handle->load_command->iextdefsym  = 0;
+	this->output_macho.dysymtab_handle->load_command->nextdefsym  = 2;
+	this->output_macho.dysymtab_handle->load_command->iundefsym  = 2;
+	this->output_macho.dysymtab_handle->load_command->nundefsym  = 0;
+	this->output_macho.dysymtab_handle->load_command->tocoff  = 0;
+	this->output_macho.dysymtab_handle->load_command->ntoc  = 0;
+	this->output_macho.dysymtab_handle->load_command->modtaboff  = 0;
+	this->output_macho.dysymtab_handle->load_command->nmodtab  = 0;
+	this->output_macho.dysymtab_handle->load_command->extrefsymoff  = 0;
+	this->output_macho.dysymtab_handle->load_command->nextrefsyms  = 0;
+	this->output_macho.dysymtab_handle->load_command->indirectsymoff  = 0;
+	this->output_macho.dysymtab_handle->load_command->nindirectsyms  = 0;
+	this->output_macho.dysymtab_handle->load_command->extreloff  = 0;
+	this->output_macho.dysymtab_handle->load_command->nextrel  = 0;
+	this->output_macho.dysymtab_handle->load_command->locreloff  = 0;
+	this->output_macho.dysymtab_handle->load_command->nlocrel  = 0;
+
+    this->buildLoadCommand(this->output_macho.dysymtab_handle,
+                           this->output_macho.dysymtab_handle->load_command, LC_DYSYMTAB,
+                            sizeof(DySymTabCommand));
 }
-void ExecutableFileBuilder::buildStringTable() {
 
+void ExecutableFileBuilder::buildStringTable() {
+    // Actually it's not a load command per se. It's more like a payload of the symbol table.
 }
 
 void ExecutableFileBuilder::buildExecutableFile() {    // We need to sort them correctly!!!
@@ -443,18 +590,48 @@ void ExecutableFileBuilder::buildExecutableFile() {    // We need to sort them c
     this->buildLinkeditSegment();
     this->buildTextSectionPayload();
 
-    this->buildBuildVersionCommand();
-
+    this->buildDyldChainedFixupsCommand();
+    this->buildExportsTrieCommand();
     this->buildSymbolTable();
     this->buildDySymbolTable();
-    this->buildStringTable();
-
     this->buildDyLinkerCommand();
-    this->buildEntryPointCommand();
     this->buildUuidCommand();
+    this->buildBuildVersionCommand();
     this->buildSourceVersionCommand();
+    this->buildEntryPointCommand();
     this->buildLoadDylibCommandHandle();
+    this->buildFunctionStartCommand();
+    this->buildDataInCodeCommand();
+    this->buildCodeSignatureCommand();
+    //this->buildStringTable();
 
-
+    
     this->wholeFile = this->mem_reg_manager->mergeRegions();
+}
+
+void ExecutableFileBuilder::testLoadCommandsMemoryRegionIsBuiltCorrectly() {
+
+    std::cout << "this->input_macho.header.sizeofcmds>>>>>>>>: " << this->input_macho.header.sizeofcmds << std::endl;
+    std::cout << "this->output_macho.header.sizeofcmds>>>>>>>: " << this->output_macho.header.sizeofcmds << std::endl;
+    std::cout << ">>>>>>>: " << sizeof(Section64) << std::endl;
+
+    /*
+    Byte* load_commands = (Byte*)malloc(sizeof(Byte) * this->output_macho.header.sizeofcmds);
+
+    // Obtain the load commands from the file itself:
+    FILE* fptr = open_macho_file(this->output_macho.file.filename);
+    fseek(fptr, sizeof(struct mach_header_64), SEEK_SET);
+    size_t items_read = fread(load_commands, this->output_macho.header.sizeofcmds, 1, fptr);
+    if (items_read != 1) {
+        fprintf(stderr, "Error while reading Mach-o load commands.\n");
+        exit(1);
+    }
+    // Compare it with the memory region:
+    if (memcmp(load_commands, this->mem_reg_manager->upperMemoryRegion, this->output_macho.header.sizeofcmds) == 0) {
+        std::cout << "Test passed for Macho file: " << this->output_macho.file.filename << std::endl;
+    } else {
+        std::cout << "Test failed for Macho file: " << this->output_macho.file.filename << std::endl;
+    }
+
+    */
 }

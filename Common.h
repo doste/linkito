@@ -22,6 +22,9 @@ enum macho_filetype {RelocatableObjectFile, ExecutableFile, DynamicLibrary};
 
 #define PAGE_SIZE 0x4000 // = 16384
 
+#define LIB_SYSTEM_PATH_NAME  "/usr/lib/libSystem.B.dylib"
+#define DYLD_PATH_NAME        "/usr/lib/dyld"
+
 
 uint64_t align_to(uint64_t val, uint64_t align);
 

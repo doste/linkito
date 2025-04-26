@@ -44,6 +44,7 @@ struct LoadCommandHandle {
 
 	LoadCommandHandle();
 	virtual void print() const = 0;
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -521,12 +522,12 @@ struct dylib_command {
 	struct dylib	dylib;		/* the library identification
 };
 */
-struct DylibCommand : LoadCommand {
+struct LoadDylibCommand : LoadCommand {
 	struct dylib dylib;		// the library identification
 };
 
 struct LoadDylibCommandHandle : LoadCommandHandle {
-	DylibCommand* load_command;
+	LoadDylibCommand* load_command;
     char* library_path_name;            // Easier to access it
 
 	LoadDylibCommandHandle();
@@ -621,12 +622,12 @@ struct dylinker_command {
 	union lc_str    name;		/* dynamic linker's path name
 };
 */
-struct DyLinkerCommand : LoadCommand {
+struct LoadDyLinkerCommand : LoadCommand {
 	union lc_str name;		// dynamic linker's path name
 };
 
 struct LoadDyLinkerCommandHandle : LoadCommandHandle {
-	DyLinkerCommand* load_command;
+	LoadDyLinkerCommand* load_command;
     char* pathname;                 // Easier to access it
 
 	LoadDyLinkerCommandHandle();

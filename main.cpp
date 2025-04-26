@@ -53,6 +53,10 @@ int main(int argc, char** argv) {
 
     builder.debugMemoryRegionManager();
 
+    builder.testLoadCommandsMemoryRegionIsBuiltCorrectly();
+
+    
+
 
 
     return 0;

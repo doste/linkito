@@ -13,6 +13,8 @@ class Debugger {
         void debugStringTable(Macho macho);
         void debugSegmentCommands(Macho macho);
 
+        void dumpRawDataToFile(void* data, uint32_t offset, uint32_t size, char* filename);
+
         void dumpLinkeditPayloadsToFile(Macho macho);
         void dumpTextSectionToFile(Macho macho);
 
