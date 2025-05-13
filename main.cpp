@@ -8,6 +8,8 @@
 #include "Tester.h"
 #include "MachoParser.h"
 
+#include "ExecutableFileBuilder3.h"
+
 
 
 int main(int argc, char** argv) {
@@ -39,7 +41,9 @@ int main(int argc, char** argv) {
 
     //debugger.dumpBuildVersionCommandToFile(macho);
 
-    //debugger.dumpWholeLoadCommandsMemoryRegionToFile(macho);
+    parser.patchTextSeg();
+
+    debugger.dumpWholeLoadCommandsMemoryRegionToFile(*parser.macho);
 
     tester.testLoadCommandsMemoryRegionIsBuiltCorrectly(*parser.macho);
     //tester.printLoadCommands(macho);
@@ -47,13 +51,15 @@ int main(int argc, char** argv) {
     ExecutableFileBuilder builder = ExecutableFileBuilder(*parser.macho);
     builder.buildExecutableFile();
 
+    //builder.debug();
 
-    //debugger.dumpLowerMemoryRegionToFile(builder);
-    debugger.dumpWholeFileToFile(builder);
+    debugger.dumpUpperMemoryRegionToFile(builder);
+    
+    //debugger.dumpWholeFileToFile(builder);
 
-    builder.debugMemoryRegionManager();
+    //builder.debugMemoryRegionManager();
 
-    builder.testLoadCommandsMemoryRegionIsBuiltCorrectly();
+    //builder.testLoadCommandsMemoryRegionIsBuiltCorrectly();
 
     
 

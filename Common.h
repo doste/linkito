@@ -17,6 +17,19 @@
 typedef uint8_t Byte;
 enum macho_filetype {RelocatableObjectFile, ExecutableFile, DynamicLibrary};
 
+struct MachHeader64 {
+	uint32_t	    magic;		        /* mach magic number identifier */
+	cpu_type_t	    cputype;	        /* cpu specifier */
+	cpu_subtype_t	cpusubtype;	        /* machine specifier */
+	uint32_t	    filetype;	        /* type of file */
+	uint32_t	    ncmds;		        /* number of load commands */
+	uint32_t	    sizeofcmds;	        /* the size of all the load commands */
+	uint32_t	    flags;		        /* flags */
+	uint32_t	    reserved;	        /* reserved */
+};
+
+
+
 // Source: https://www.mikeash.com/pyblog/friday-qa-2012-11-09-dyld-dynamic-linking-on-os-x.html
 #define STANDARD_EXECUTABLE_LOAD_ADDR 0x0000000100000000
 
@@ -29,7 +42,7 @@ enum macho_filetype {RelocatableObjectFile, ExecutableFile, DynamicLibrary};
 uint64_t align_to(uint64_t val, uint64_t align);
 
 
-void read_macho_header(FILE* fptr, struct mach_header_64* header);
+void read_macho_header(FILE* fptr, MachHeader64* header);
 FILE* open_macho_file(const char *pathname);
 
 class File {
@@ -51,6 +64,14 @@ class File {
 extern std::map<uint32_t, std::string> macroToString;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
+
+
+const std::vector<uint32_t> getLinkeditCommands();
+bool isLinkeditDataCommand(uint32_t input_cmd);
+
+
+size_t alignStringLengthToSixteen(char* a_string);
+char* allocMemoryForPathnameAligned(char* pathname, size_t pathname_size_aligned);
 
 
 #endif

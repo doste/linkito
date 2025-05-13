@@ -1,3 +1,4 @@
+#include <set>
 #include "Common.h"
 #include "LoadCommands.h"
 
@@ -28,8 +29,9 @@ void File::fill_buffer() {
     }
 }
 
-void read_macho_header(FILE* fptr, struct mach_header_64* header) {
-    size_t items_read = fread(header, sizeof(struct mach_header_64), 1, fptr);
+void read_macho_header(FILE* fptr, MachHeader64* header) {
+    assert(header);
+    size_t items_read = fread(header, sizeof(MachHeader64), 1, fptr);
     if (items_read != 1) {
         fprintf(stderr, "Error while reading Mach-o header.\n");
         exit(1);
@@ -134,3 +136,31 @@ std::map<uint32_t, std::string> macroToString {
     {LC_TWOLEVEL_HINTS, "LC_TWOLEVEL_HINTS"},
     {LC_PREBIND_CKSUM, "LC_PREBIND_CKSUM"},
 };
+
+
+
+const std::vector<uint32_t> getLinkeditCommands() {
+    return {LC_CODE_SIGNATURE, LC_SEGMENT_SPLIT_INFO,
+            LC_FUNCTION_STARTS, LC_DATA_IN_CODE,
+            LC_DYLIB_CODE_SIGN_DRS,
+            LC_LINKER_OPTIMIZATION_HINT,
+            LC_DYLD_EXPORTS_TRIE,
+            LC_DYLD_CHAINED_FIXUPS};
+}
+
+bool isLinkeditDataCommand(uint32_t input_cmd) {
+    const std::vector<uint32_t> vector_linkedit_data_cmds = getLinkeditCommands();
+    std::set<uint32_t> linkedit_data_cmds(vector_linkedit_data_cmds.begin(), vector_linkedit_data_cmds.end());
+    return linkedit_data_cmds.count(input_cmd) > 0;
+}
+
+
+size_t alignStringLengthToSixteen(char* a_string) {
+    return align_to(strlen(a_string) + 1, 16);
+}
+
+char* allocMemoryForPathnameAligned(char* pathname, size_t pathname_size_aligned) {
+    char* pathname_padded_with_zeros = (char*)calloc(pathname_size_aligned, sizeof(char));
+    memcpy(pathname_padded_with_zeros, pathname, strlen(pathname));
+    return pathname_padded_with_zeros;
+}

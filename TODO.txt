@@ -1,0 +1,13 @@
+
+
+- Use smart pointers
+- Use std::string_view
+
+- Use std::optional
+
+
+
+// loader.h : "The cmdsize for 32-bit architectures MUST be a multiple of 4 bytes and for 64-bit architectures MUST be a multiple
+//            of 8 bytes (these are forever the maximum alignment of any load commands)"
+
+Test this. Check that for every load command.

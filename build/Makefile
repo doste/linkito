@@ -129,6 +129,19 @@ linkito/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/linkito.dir/build.make CMakeFiles/linkito.dir/build
 .PHONY : linkito/fast
 
+#=============================================================================
+# Target rules for targets named empty
+
+# Build rule for target.
+empty: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 empty
+.PHONY : empty
+
+# fast build rule for target.
+empty/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/empty.dir/build.make CMakeFiles/empty.dir/build
+.PHONY : empty/fast
+
 Common.o: Common.cpp.o
 .PHONY : Common.o
 
@@ -200,6 +213,30 @@ ExecutableFileBuilder.s: ExecutableFileBuilder.cpp.s
 ExecutableFileBuilder.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/linkito.dir/build.make CMakeFiles/linkito.dir/ExecutableFileBuilder.cpp.s
 .PHONY : ExecutableFileBuilder.cpp.s
+
+ExecutableFileBuilder3.o: ExecutableFileBuilder3.cpp.o
+.PHONY : ExecutableFileBuilder3.o
+
+# target to build an object file
+ExecutableFileBuilder3.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/linkito.dir/build.make CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.o
+.PHONY : ExecutableFileBuilder3.cpp.o
+
+ExecutableFileBuilder3.i: ExecutableFileBuilder3.cpp.i
+.PHONY : ExecutableFileBuilder3.i
+
+# target to preprocess a source file
+ExecutableFileBuilder3.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/linkito.dir/build.make CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.i
+.PHONY : ExecutableFileBuilder3.cpp.i
+
+ExecutableFileBuilder3.s: ExecutableFileBuilder3.cpp.s
+.PHONY : ExecutableFileBuilder3.s
+
+# target to generate assembly for a file
+ExecutableFileBuilder3.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/linkito.dir/build.make CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.s
+.PHONY : ExecutableFileBuilder3.cpp.s
 
 LoadCommands.o: LoadCommands.cpp.o
 .PHONY : LoadCommands.o
@@ -297,6 +334,30 @@ Tester.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/linkito.dir/build.make CMakeFiles/linkito.dir/Tester.cpp.s
 .PHONY : Tester.cpp.s
 
+empty.o: empty.c.o
+.PHONY : empty.o
+
+# target to build an object file
+empty.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/empty.dir/build.make CMakeFiles/empty.dir/empty.c.o
+.PHONY : empty.c.o
+
+empty.i: empty.c.i
+.PHONY : empty.i
+
+# target to preprocess a source file
+empty.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/empty.dir/build.make CMakeFiles/empty.dir/empty.c.i
+.PHONY : empty.c.i
+
+empty.s: empty.c.s
+.PHONY : empty.s
+
+# target to generate assembly for a file
+empty.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/empty.dir/build.make CMakeFiles/empty.dir/empty.c.s
+.PHONY : empty.c.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -329,6 +390,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... empty"
 	@echo "... linkito"
 	@echo "... Common.o"
 	@echo "... Common.i"
@@ -339,6 +401,9 @@ help:
 	@echo "... ExecutableFileBuilder.o"
 	@echo "... ExecutableFileBuilder.i"
 	@echo "... ExecutableFileBuilder.s"
+	@echo "... ExecutableFileBuilder3.o"
+	@echo "... ExecutableFileBuilder3.i"
+	@echo "... ExecutableFileBuilder3.s"
 	@echo "... LoadCommands.o"
 	@echo "... LoadCommands.i"
 	@echo "... LoadCommands.s"
@@ -351,6 +416,9 @@ help:
 	@echo "... Tester.o"
 	@echo "... Tester.i"
 	@echo "... Tester.s"
+	@echo "... empty.o"
+	@echo "... empty.i"
+	@echo "... empty.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

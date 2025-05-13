@@ -3,18 +3,18 @@
 
 
 void Tester::testLoadCommandsMemoryRegionIsBuiltCorrectly(Macho macho) {
-    Byte* load_commands = (Byte*)malloc(sizeof(Byte) * macho.header.sizeofcmds);
+    Byte* load_commands = (Byte*)malloc(sizeof(Byte) * macho.header->sizeofcmds);
 
     // Obtain the load commands from the file itself:
     FILE* fptr = open_macho_file(macho.file.filename);
-    fseek(fptr, sizeof(struct mach_header_64), SEEK_SET);
-    size_t items_read = fread(load_commands, macho.header.sizeofcmds, 1, fptr);
+    fseek(fptr, sizeof(MachHeader64), SEEK_SET);
+    size_t items_read = fread(load_commands, macho.header->sizeofcmds, 1, fptr);
     if (items_read != 1) {
         fprintf(stderr, "Error while reading Mach-o load commands.\n");
         exit(1);
     }
     // Compare it with the memory region:
-    if (memcmp(load_commands, macho.load_commands_mem_region.region, macho.header.sizeofcmds) == 0) {
+    if (memcmp(load_commands, macho.load_commands_mem_region.region, macho.header->sizeofcmds) == 0) {
         std::cout << "Test passed for Macho file: " << macho.file.filename << std::endl;
     } else {
         std::cout << "Test failed for Macho file: " << macho.file.filename << std::endl;

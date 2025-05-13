@@ -30,10 +30,32 @@ void MachoParser::buildLoadCommands() {
     this->buildSourceVersionCommand();
 }
 
+void MachoParser::patchTextSeg() {
+    Byte* buffer_to_read_from = this->macho->load_commands_mem_region.region;
+    std::string key = "LC_SEGMENT_64:__TEXT";
+    uint32_t offset_to_read_from = this->macho->load_commands_mem_region.offsets[key].offset;
+    //std::cout << "offset_to_read_from" << offset_to_read_from << std::endl;
+    uint32_t size_to_read = this->macho->load_commands_mem_region.offsets[key].size;
+    //std::cout << "size_to_read" << size_to_read << std::endl;
+
+    SegmentCommand64 patched_lc;
+    patched_lc.vmaddr = 0xEEEEEEEEE;
+    patched_lc.vmsize = 0xEEEEEEEEE;
+    patched_lc.fileoff = 0xEEEEEEEEE;
+    patched_lc.filesize = 0xEEEEEEEEE;
+    patched_lc.maxprot = 0xEEEEEEEEE;
+    patched_lc.initprot = 0xEEEEEEEEE;
+    patched_lc.nsects = 0xEEEEEEE;
+    patched_lc.flags = 0xEEEEEEEEE;
+    patched_lc.cmd = 0xFF;
+
+    memcpy(buffer_to_read_from + offset_to_read_from, &patched_lc, size_to_read);
+}
+
 /*
 The idea with the Load Commands Region is to have a memory region where all the load commands reside.
 This way when we want to obtain a given load command we read it from this region.
-All we need to read a load command from here is its 'name'. Oficially the load commands have no name per se, but
+All we need to read a load command from here is its 'name'. Officially the load commands have no name per se, but
 we use the 'cmd' field as a string. In the case where there are multiple load commands with the same 'cmd', for example
 the load commands corresponding to segments (LC_SEGMENT_64) we append the segment name ('segname' field) to the string
 representing its name.
@@ -52,15 +74,15 @@ void MachoParser::buildLoadCommandsMemoryRegion() {
     Byte* buf = this->macho->file.buffer;
     uint32_t offset_to_read_buffer = 0;
     // Skip the header
-    offset_to_read_buffer += sizeof(struct mach_header_64);
+    offset_to_read_buffer += sizeof(MachHeader64);
     uint32_t cmd, cmdsize;
 
     this->macho->load_commands_mem_region = LoadCommandsRegion();
 
-    this->macho->load_commands_mem_region.region = (Byte*)malloc(sizeof(Byte) * this->macho->header.sizeofcmds);
+    this->macho->load_commands_mem_region.region = (Byte*)malloc(sizeof(Byte) * this->macho->header->sizeofcmds);
     uint32_t offset_mem_region = 0;
 
-    while (offset_to_read_buffer < (sizeof(struct mach_header_64) + this->macho->header.sizeofcmds)) {
+    while (offset_to_read_buffer < (sizeof(MachHeader64) + this->macho->header->sizeofcmds)) {
 
         // Save the offset of the beginning of this load command:
         uint32_t this_load_command_offset = offset_to_read_buffer;
@@ -83,7 +105,6 @@ void MachoParser::buildLoadCommandsMemoryRegion() {
             char segname[16] = {0}; // The segname field follows directly the cmdsize field.
             uint32_t segname_offset = offset_to_read_buffer + (sizeof(uint32_t) + sizeof(uint32_t));
             memcpy(segname, buf + segname_offset, 16);
-            //std::cout << "segname >>>>>>>>" << segname << std::endl;
             key_cmd_name = key_cmd_name + ":";
             key_cmd_name = key_cmd_name + std::string{segname};
         }
@@ -91,7 +112,7 @@ void MachoParser::buildLoadCommandsMemoryRegion() {
         // with respect to the memory region of the load commands we are building, so to correctly do that we
         // need to subtract the header that is at the beginning of the file.
         // The load commands follow it directly after.
-        offset_and_size = OffsetAndSize(this_load_command_offset - sizeof(struct mach_header_64), cmdsize);
+        offset_and_size = OffsetAndSize(this_load_command_offset - sizeof(MachHeader64), cmdsize);
 
         this->macho->load_commands_mem_region.offsets.insert(std::make_pair(key_cmd_name, offset_and_size));
 
@@ -114,8 +135,8 @@ void MachoParser::buildBuildVersionLoadCommand() {
 
     // And now the struct build_tool_version that follows it (the number of them is given by the ntools field).
     uint32_t build_tool_version_offset = offset_to_read_from + sizeof(BuildVersionCommand);
-    this->macho->build_version_handle->tool_versions.reserve(this->macho->build_version_handle->load_command->ntools * sizeof(struct build_tool_version));
-    for (size_t i = 0; i < this->macho->build_version_handle->load_command->ntools; i++) {
+    this->macho->build_version_handle->tool_versions.reserve(static_cast<BuildVersionCommand*>(this->macho->build_version_handle->load_command)->ntools * sizeof(struct build_tool_version));
+    for (size_t i = 0; i < static_cast<BuildVersionCommand*>(this->macho->build_version_handle->load_command)->ntools; i++) {
         memcpy(&(this->macho->build_version_handle->tool_versions[i]), buffer_to_read_from + build_tool_version_offset, sizeof(struct build_tool_version));
         build_tool_version_offset += sizeof(struct build_tool_version);
     }
@@ -159,7 +180,7 @@ void MachoParser::buildUuidCommand() {
     uint32_t offset_to_read_from = this->macho->load_commands_mem_region.offsets[key].offset;
     uint32_t size_to_read = this->macho->load_commands_mem_region.offsets[key].size;
 
-    this->macho->uuid_handle = new UuidCommandCommandHandle();
+    this->macho->uuid_handle = new UuidCommandHandle();
     this->macho->uuid_handle->load_command = new UuidCommand();
 
     // Just copy the struct itself:
@@ -193,7 +214,7 @@ void MachoParser::buildLoadDylibCommandHandle() {
     memcpy(this->macho->load_dylib_handle->load_command, buffer_to_read_from + offset_to_read_from, sizeof(LoadDylibCommand));
     // And then the struct dylib, that is just after:
     uint32_t size_of_cmd_and_cmdsize_fields = sizeof(uint32_t) + sizeof(uint32_t);
-    memcpy(&(this->macho->load_dylib_handle->load_command->dylib), buffer_to_read_from + offset_to_read_from + size_of_cmd_and_cmdsize_fields, sizeof(struct dylib));
+    memcpy(&(static_cast<LoadDylibCommand*>(this->macho->load_dylib_handle->load_command)->dylib), buffer_to_read_from + offset_to_read_from + size_of_cmd_and_cmdsize_fields, sizeof(struct dylib));
 
     // Finally, the pathname, its offset with respect to the beginning of the struct DylibCommand is given by name.offset:
     uint32_t library_pathname_string_len = this->macho->load_dylib_handle->load_command->cmdsize - sizeof(LoadDylibCommand); // Because cmdsize includes pathname string.
@@ -235,16 +256,16 @@ void MachoParser::buildSegmentCommands() {
         seg_handle->load_command = new SegmentCommand64();
         memcpy(seg_handle->load_command, buffer_to_read_from + offset_to_read_from, sizeof(SegmentCommand64)); // cmdsize includes sizeof section_64 structs
 
-        seg_handle->segname = seg_handle->load_command->segname;
+        seg_handle->segname = static_cast<SegmentCommand64*>(seg_handle->load_command)->segname;
 
-        if (seg_handle->load_command->nsects != 0) {  // If it has sections following it, we add them to the vector
-            seg_handle->sections.reserve(seg_handle->load_command->nsects);
+        if (static_cast<SegmentCommand64*>(seg_handle->load_command)->nsects != 0) {  // If it has sections following it, we add them to the vector
+            seg_handle->sections.reserve(static_cast<SegmentCommand64*>(seg_handle->load_command)->nsects);
             
             // The sections follow the struct segment_command_64
             uint32_t section_offset = offset_to_read_from + sizeof(SegmentCommand64);
 
             // Build and add each section to the vector
-            for (size_t i = 0; i < seg_handle->load_command->nsects; i++) {
+            for (size_t i = 0; i < static_cast<SegmentCommand64*>(seg_handle->load_command)->nsects; i++) {
                 SectionHandle* sect = new SectionHandle();
                 memcpy(sect->section, buffer_to_read_from + section_offset, sizeof(Section64));
                 seg_handle->sections.push_back(sect);
@@ -256,21 +277,6 @@ void MachoParser::buildSegmentCommands() {
 } 
 
 
-
-const std::vector<uint32_t> getLinkeditCommands() {
-    return {LC_CODE_SIGNATURE, LC_SEGMENT_SPLIT_INFO,
-            LC_FUNCTION_STARTS, LC_DATA_IN_CODE,
-            LC_DYLIB_CODE_SIGN_DRS,
-            LC_LINKER_OPTIMIZATION_HINT,
-            LC_DYLD_EXPORTS_TRIE,
-            LC_DYLD_CHAINED_FIXUPS};
-}
-
-bool isLinkeditDataCommand(uint32_t input_cmd) {
-    const std::vector<uint32_t> vector_linkedit_data_cmds = getLinkeditCommands();
-    std::set<uint32_t> linkedit_data_cmds(vector_linkedit_data_cmds.begin(), vector_linkedit_data_cmds.end());
-    return linkedit_data_cmds.count(input_cmd) > 0;
-}
 
 void MachoParser::buildLinkeditDataCommands() {
     const std::vector<uint32_t> linkedit_data_commands = getLinkeditCommands();
@@ -317,8 +323,8 @@ void MachoParser::assignPayloadsToSections() {
 
 void MachoParser::buildStringTable() {
     Byte* buf = this->macho->file.buffer;
-    uint32_t strtab_offset = this->macho->symtab.symtab_command_handle->load_command->stroff;
-    uint32_t strtab_size = this->macho->symtab.symtab_command_handle->load_command->strsize;
+    uint32_t strtab_offset = static_cast<SymTabCommand*>(this->macho->symtab.symtab_command_handle->load_command)->stroff;
+    uint32_t strtab_size = static_cast<SymTabCommand*>(this->macho->symtab.symtab_command_handle->load_command)->strsize;
     char* input_string_table = (char*)malloc(sizeof(char) * strtab_size);
     memcpy(input_string_table, buf + strtab_offset, strtab_size);
 
@@ -384,8 +390,8 @@ void MachoParser::buildSymbolTable() {
     // this offset is with respect to the whole file not the load commands region, so
     // we need to use this->file.buffer as 'base'.
     Byte* buf = this->macho->file.buffer;
-    uint32_t nsyms = this->macho->symtab.symtab_command_handle->load_command->nsyms;
-    uint32_t symtab_offset = this->macho->symtab.symtab_command_handle->load_command->symoff;
+    uint32_t nsyms = static_cast<SymTabCommand*>(this->macho->symtab.symtab_command_handle->load_command)->nsyms;
+    uint32_t symtab_offset = static_cast<SymTabCommand*>(this->macho->symtab.symtab_command_handle->load_command)->symoff;
 
     struct nlist_64* input_symbol_table = (struct nlist_64*)malloc(sizeof(struct nlist_64) * nsyms);
     memcpy(input_symbol_table, buf + symtab_offset, sizeof(struct nlist_64) * nsyms);

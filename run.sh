@@ -1,0 +1,1 @@
+./build/linkito ./empty

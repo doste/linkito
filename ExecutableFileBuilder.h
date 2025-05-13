@@ -3,6 +3,8 @@
 
 #include "Macho.h"
 
+#include <map>
+
 #define INITIAL_CAPACITY 64
 
 /*
@@ -18,16 +20,45 @@ the middle. That will be the final executable file.
 Each 'MemoryRegion' in turn are composed of 'MemoryBlock's.
 For example each LoadCommmand will be build using a MemoryBlock and then appending it to the Region.
 */
-
+/*
 struct MemoryBlock {
-    Byte* data;
+    std::string id;
+    Byte* data{};
     OffsetAndSize offset_and_size;      // Offset with respect to the beginning of the Region containing it.
 
     MemoryBlock();
     MemoryBlock(uint64_t);
 
+    template <class T>
+    void fillMemoryBlockT(T* data, std::string id);
+ 
+
     void fillMemoryBlock(void*);
+    void fillMemoryBlock(void*, std::string id);
+    void fillMemoryBlockWithZeros();
 };
+
+template <class T>
+struct MemoryBlock {
+    uint64_t id;
+    T* data{};
+    OffsetAndSize offset_and_size;      // Offset with respect to the beginning of the Region containing it.
+
+    MemoryBlock();
+    MemoryBlock(uint64_t);
+    MemoryBlock(uint64_t size, std::string id);
+    MemoryBlock(Byte* data, uint64_t size);
+
+    void fillMemoryBlockT(T* data, std::string id);
+ 
+    void fillMemoryBlock(void*);
+    void fillMemoryBlock(void*, std::string id);
+    void fillMemoryBlockWithZeros();
+};
+
+
+
+
 
 struct MemoryRegion {
     Byte* data;
@@ -36,9 +67,32 @@ struct MemoryRegion {
 
     MemoryRegion();
 
-    std::vector<MemoryBlock*> blocks;
+    //std::vector<MemoryBlock*> blocks;
+    std::vector<MemoryBlock<Byte>> blocks;
 
-    void appendMemoryBlock(MemoryBlock* mem_block);
+    //std::map<std::string, MemoryBlock*> blocks_id_map;
+    //std::map<std::string, MemoryBlock<Byte>*> blocks_id_map;
+    std::map<std::string, uint64_t> blocks_id_map;  // Dictionary for blocks [id => offset in the region]
+
+    //void appendMemoryBlock(MemoryBlock* mem_block);
+    
+    void appendMemoryBlock(MemoryBlock<Byte>* mem_block);
+
+    uint64_t appendMemoryBlockToLayout(MemoryBlock<Byte> mem_block);
+
+    //MemoryBlock* retrieveMemoryBlockById(std::string id);
+    template <class T>
+    MemoryBlock<T>* retrieveMemoryBlockById(std::string id);
+
+    void f(MemoryBlock<Byte> h);
+    void buildMemoryRegionFromLayout();
+    void buildMemoryRegionFromLayout(MemoryBlock<Byte>*);
+    
+    MemoryBlock<Byte>& getMemoryBlockWithId(uint64_t id);
+
+
+    template <class T>
+    T** retrieveMemoryBlockByIdAndType(std::string id);
 
     void debug();
 
@@ -64,6 +118,14 @@ class ExecutableFileBuilder {
         ExecutableFileBuilder();
         ExecutableFileBuilder(Macho);
 
+        void firstPass();
+        void patchHeader(uint64_t);
+        void patchPageZeroSegment(uint64_t);
+        //void patchValues();
+        void patchValues(std::map<std::string, uint64_t>);
+        void patchEntryPointCommand();
+
+
         void buildExecutableFile();
         Byte* wholeFile;        // Temporarie. Just to test.
 
@@ -80,10 +142,12 @@ class ExecutableFileBuilder {
                                                     LoadCommand* load_command,
                                                     uint32_t cmd, uint32_t cmdsize,
                                                     uint32_t ofsset_for_data, void* data_to_append, uint32_t size_of_data_to_append);
-
-        void buildHeader();
+        
+        
+        uint64_t buildHeader();
+        //MemoryBlock<Byte>* buildHeader();
         void buildSegments();
-            void buildPageZeroSegment();
+            uint64_t buildPageZeroSegment();
             void buildTextSegment();
             void buildLinkeditSegment();
         void buildTextSectionPayload();
@@ -107,6 +171,6 @@ class ExecutableFileBuilder {
         void buildLoadDylibCommandHandle();
 
 };
-
+*/
 
 #endif

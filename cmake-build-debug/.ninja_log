@@ -1,0 +1,19 @@
+# ninja log v6
+3	46	1745704891036506533	build.ninja	8a28cc60d405dee0
+2	587	1745704659563265163	CMakeFiles/linkito.dir/Debugger.cpp.o	46d0655bfe7301c7
+1	593	1745704659562831784	CMakeFiles/linkito.dir/Common.cpp.o	c516bc79d1c0b26b
+3	595	1745704659563980755	CMakeFiles/linkito.dir/main.cpp.o	7eacbbd9380393f4
+2	583	1745704659563383831	CMakeFiles/linkito.dir/Tester.cpp.o	e1ba2679d4cd36ef
+2	572	1745704659563127245	CMakeFiles/linkito.dir/Macho.cpp.o	55d52d03712a3066
+2	613	1745704659563511208	CMakeFiles/linkito.dir/LoadCommands.cpp.o	2c79564ca4b90cef
+2	718	1745704659563857003	CMakeFiles/linkito.dir/MachoParser.cpp.o	a6893c4abc75685f
+2	44	1745704891036506533	build.ninja	8a28cc60d405dee0
+4	434	1745704891045879846	CMakeFiles/linkito.dir/Macho.cpp.o	d4095fe22b1a0c06
+4	437	1745704891045984472	CMakeFiles/linkito.dir/Debugger.cpp.o	c23d1d35f1251ecb
+4	439	1745704891046084015	CMakeFiles/linkito.dir/Tester.cpp.o	195bd54c1d5c4c2
+4	440	1745704891045692260	CMakeFiles/linkito.dir/Common.cpp.o	f490d938b87308f5
+4	445	1745704891046496269	CMakeFiles/linkito.dir/main.cpp.o	a5d4e198044025bb
+4	466	1745704891046185682	CMakeFiles/linkito.dir/LoadCommands.cpp.o	5c34682073bac80f
+4	568	1745704891046388643	CMakeFiles/linkito.dir/MachoParser.cpp.o	effa299732414bb3
+6	546	1745960944061586757	CMakeFiles/linkito.dir/ExecutableFileBuilder.cpp.o	d7cbc1f6005f5a2f
+550	663	1745960944605481497	linkito	d36e3038253a1449

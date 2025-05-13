@@ -11,6 +11,8 @@ class MachoParser {
 
         void buildLoadCommands();
 
+        void patchTextSeg();
+
         Macho* macho;
 
     private:

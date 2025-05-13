@@ -64,6 +64,7 @@ CMAKE_BINARY_DIR = /Users/juanignaciobianchi/devdev/linkito++/build
 
 # The main recursive "all" target.
 all: CMakeFiles/linkito.dir/all
+all: CMakeFiles/empty.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -72,6 +73,7 @@ preinstall:
 
 # The main recursive "clean" target.
 clean: CMakeFiles/linkito.dir/clean
+clean: CMakeFiles/empty.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -81,12 +83,12 @@ clean: CMakeFiles/linkito.dir/clean
 CMakeFiles/linkito.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/linkito.dir/build.make CMakeFiles/linkito.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/linkito.dir/build.make CMakeFiles/linkito.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/juanignaciobianchi/devdev/linkito++/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9 "Built target linkito"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/juanignaciobianchi/devdev/linkito++/build/CMakeFiles --progress-num=3,4,5,6,7,8,9,10,11,12 "Built target linkito"
 .PHONY : CMakeFiles/linkito.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/linkito.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/juanignaciobianchi/devdev/linkito++/build/CMakeFiles 9
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/juanignaciobianchi/devdev/linkito++/build/CMakeFiles 10
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/linkito.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/juanignaciobianchi/devdev/linkito++/build/CMakeFiles 0
 .PHONY : CMakeFiles/linkito.dir/rule
@@ -99,6 +101,32 @@ linkito: CMakeFiles/linkito.dir/rule
 CMakeFiles/linkito.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/linkito.dir/build.make CMakeFiles/linkito.dir/clean
 .PHONY : CMakeFiles/linkito.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/empty.dir
+
+# All Build rule for target.
+CMakeFiles/empty.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/empty.dir/build.make CMakeFiles/empty.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/empty.dir/build.make CMakeFiles/empty.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/juanignaciobianchi/devdev/linkito++/build/CMakeFiles --progress-num=1,2 "Built target empty"
+.PHONY : CMakeFiles/empty.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/empty.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/juanignaciobianchi/devdev/linkito++/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/empty.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/juanignaciobianchi/devdev/linkito++/build/CMakeFiles 0
+.PHONY : CMakeFiles/empty.dir/rule
+
+# Convenience name for target.
+empty: CMakeFiles/empty.dir/rule
+.PHONY : empty
+
+# clean rule for target.
+CMakeFiles/empty.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/empty.dir/build.make CMakeFiles/empty.dir/clean
+.PHONY : CMakeFiles/empty.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

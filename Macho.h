@@ -19,6 +19,8 @@ class Macho {
     friend class Debugger;
     friend class Tester;
     friend class ExecutableFileBuilder;
+    friend class ExecutableFileBuilder2;
+    friend class ExecutableFileBuilder3;
     friend class MachoParser;
     
     public:
@@ -27,10 +29,11 @@ class Macho {
         Macho(char* filename);
 
         SegmentHandle* getSegmentHandleForSegmentNamed(std::string segname);
+        LinkeditDataCommandHandle* getLinkeditDataCmdHandleForCmd(uint32_t cmd);
 
     private:
     
-        struct mach_header_64 header;
+        MachHeader64* header;
         macho_filetype filetype;
         File file;
 
@@ -45,7 +48,7 @@ class Macho {
         BuildVersionHandle* build_version_handle;
         LoadDyLinkerCommandHandle* load_dylinker_handle;
         EntryPointCommandHandle* entry_point_handle;
-        UuidCommandCommandHandle* uuid_handle;
+        UuidCommandHandle* uuid_handle;
         SourceVersionCommandHandle* source_version_handle;
         LoadDylibCommandHandle* load_dylib_handle;
         LoadCommandsRegion load_commands_mem_region;

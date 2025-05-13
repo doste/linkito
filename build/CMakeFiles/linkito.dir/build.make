@@ -153,10 +153,24 @@ CMakeFiles/linkito.dir/ExecutableFileBuilder.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/linkito.dir/ExecutableFileBuilder.cpp.s"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/juanignaciobianchi/devdev/linkito++/ExecutableFileBuilder.cpp -o CMakeFiles/linkito.dir/ExecutableFileBuilder.cpp.s
 
+CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.o: CMakeFiles/linkito.dir/flags.make
+CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.o: /Users/juanignaciobianchi/devdev/linkito++/ExecutableFileBuilder3.cpp
+CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.o: CMakeFiles/linkito.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/juanignaciobianchi/devdev/linkito++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.o -MF CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.o.d -o CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.o -c /Users/juanignaciobianchi/devdev/linkito++/ExecutableFileBuilder3.cpp
+
+CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/juanignaciobianchi/devdev/linkito++/ExecutableFileBuilder3.cpp > CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.i
+
+CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/juanignaciobianchi/devdev/linkito++/ExecutableFileBuilder3.cpp -o CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.s
+
 CMakeFiles/linkito.dir/MachoParser.cpp.o: CMakeFiles/linkito.dir/flags.make
 CMakeFiles/linkito.dir/MachoParser.cpp.o: /Users/juanignaciobianchi/devdev/linkito++/MachoParser.cpp
 CMakeFiles/linkito.dir/MachoParser.cpp.o: CMakeFiles/linkito.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/juanignaciobianchi/devdev/linkito++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/linkito.dir/MachoParser.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/juanignaciobianchi/devdev/linkito++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/linkito.dir/MachoParser.cpp.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/linkito.dir/MachoParser.cpp.o -MF CMakeFiles/linkito.dir/MachoParser.cpp.o.d -o CMakeFiles/linkito.dir/MachoParser.cpp.o -c /Users/juanignaciobianchi/devdev/linkito++/MachoParser.cpp
 
 CMakeFiles/linkito.dir/MachoParser.cpp.i: cmake_force
@@ -170,7 +184,7 @@ CMakeFiles/linkito.dir/MachoParser.cpp.s: cmake_force
 CMakeFiles/linkito.dir/main.cpp.o: CMakeFiles/linkito.dir/flags.make
 CMakeFiles/linkito.dir/main.cpp.o: /Users/juanignaciobianchi/devdev/linkito++/main.cpp
 CMakeFiles/linkito.dir/main.cpp.o: CMakeFiles/linkito.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/juanignaciobianchi/devdev/linkito++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/linkito.dir/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/juanignaciobianchi/devdev/linkito++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/linkito.dir/main.cpp.o"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/linkito.dir/main.cpp.o -MF CMakeFiles/linkito.dir/main.cpp.o.d -o CMakeFiles/linkito.dir/main.cpp.o -c /Users/juanignaciobianchi/devdev/linkito++/main.cpp
 
 CMakeFiles/linkito.dir/main.cpp.i: cmake_force
@@ -189,6 +203,7 @@ linkito_OBJECTS = \
 "CMakeFiles/linkito.dir/Tester.cpp.o" \
 "CMakeFiles/linkito.dir/LoadCommands.cpp.o" \
 "CMakeFiles/linkito.dir/ExecutableFileBuilder.cpp.o" \
+"CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.o" \
 "CMakeFiles/linkito.dir/MachoParser.cpp.o" \
 "CMakeFiles/linkito.dir/main.cpp.o"
 
@@ -201,11 +216,12 @@ linkito: CMakeFiles/linkito.dir/Debugger.cpp.o
 linkito: CMakeFiles/linkito.dir/Tester.cpp.o
 linkito: CMakeFiles/linkito.dir/LoadCommands.cpp.o
 linkito: CMakeFiles/linkito.dir/ExecutableFileBuilder.cpp.o
+linkito: CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.o
 linkito: CMakeFiles/linkito.dir/MachoParser.cpp.o
 linkito: CMakeFiles/linkito.dir/main.cpp.o
 linkito: CMakeFiles/linkito.dir/build.make
 linkito: CMakeFiles/linkito.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/juanignaciobianchi/devdev/linkito++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable linkito"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/juanignaciobianchi/devdev/linkito++/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX executable linkito"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/linkito.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

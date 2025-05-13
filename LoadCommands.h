@@ -5,6 +5,7 @@
 #include "Common.h"
 
 
+
 struct OffsetAndSize {
 	uint64_t offset;
     uint64_t size;
@@ -17,7 +18,6 @@ struct OffsetAndSize {
 // This way it's easier to get a Load Command from the region, because we would know how much to read.
 struct LoadCommandsRegion {
 	Byte* region;
-	//std::map<LoadCommandInfo, OffsetAndSize, LoadCommandInfoCompare> offsets;
 	std::map<std::string, OffsetAndSize> offsets;
 
 	LoadCommandsRegion();
@@ -67,7 +67,6 @@ struct SymTabCommand : LoadCommand {
 };
 
 struct SymTabCommandHandle : LoadCommandHandle {
-	SymTabCommand* load_command;
 	virtual void print() const;
 
 	SymTabCommandHandle();
@@ -305,8 +304,6 @@ struct DySymTabCommand : LoadCommand {
 };
 
 struct DySymTabHandle : LoadCommandHandle {
-	DySymTabCommand* load_command;
-
 	DySymTabHandle();
 	virtual void print() const;
 };
@@ -385,10 +382,8 @@ struct SectionHandle {
 
 
 struct SegmentHandle : LoadCommandHandle {
-	SegmentCommand64* load_command;
 	std::vector<SectionHandle*> sections;
 
-    //char* segname;     // Easier to access.
     std::string segname;
 
 	SegmentHandle();
@@ -430,36 +425,31 @@ struct LinkeditDataCommandHandle : LoadCommandHandle {
 
 struct DyldChainedFixupsCommand : LinkeditDataCommand {};
 struct DyldChainedFixupsCommandHandle : LinkeditDataCommandHandle {
-    DyldChainedFixupsCommand* load_command;
-
+    //Its load_command field will be of type DyldChainedFixupsCommand*;
     DyldChainedFixupsCommandHandle();
 };
 
 struct FunctionStartsCommand : LinkeditDataCommand {};
 struct FunctionStartsCommandHandle : LinkeditDataCommandHandle {
-    FunctionStartsCommand* load_command;
-
+    //Its load_command field will be of type FunctionStartsCommand*;
     FunctionStartsCommandHandle();
 };
 
 struct DataInCodeCommand : LinkeditDataCommand {};
 struct DataInCodeCommandHandle : LinkeditDataCommandHandle {
-    DataInCodeCommand* load_command;
-
+    //Its load_command field will be of type DataInCodeCommandHandle*;
     DataInCodeCommandHandle();
 };
 
 struct CodeSignatureCommand : LinkeditDataCommand {};
 struct CodeSignatureCommandHandle : LinkeditDataCommandHandle {
-    CodeSignatureCommand* load_command;
-
+    //Its load_command field will be of type CodeSignatureCommand*;
     CodeSignatureCommandHandle();
 };
 
 struct ExportsTrieCommand : LinkeditDataCommand {};
 struct ExportsTrieCommandHandle : LinkeditDataCommandHandle {
-    ExportsTrieCommand* load_command;
-
+    //Its load_command field will be of type ExportsTrieCommand*;
     ExportsTrieCommandHandle();
 };
 
@@ -486,7 +476,6 @@ struct build_tool_version {
 };
 */
 struct BuildVersionHandle : LoadCommandHandle {
-	BuildVersionCommand* load_command;
 	std::vector<struct build_tool_version> tool_versions;
 
 	BuildVersionHandle();
@@ -527,7 +516,6 @@ struct LoadDylibCommand : LoadCommand {
 };
 
 struct LoadDylibCommandHandle : LoadCommandHandle {
-	LoadDylibCommand* load_command;
     char* library_path_name;            // Easier to access it
 
 	LoadDylibCommandHandle();
@@ -551,7 +539,6 @@ struct SourceVersionCommand : LoadCommand {
 };
 
 struct SourceVersionCommandHandle : LoadCommandHandle {
-	SourceVersionCommand* load_command;
 
 	SourceVersionCommandHandle();
 	virtual void print() const;
@@ -572,10 +559,8 @@ struct UuidCommand : LoadCommand {
 	uint8_t	uuid[16];		// the 128-bit uuid
 };
 
-struct UuidCommandCommandHandle : LoadCommandHandle {
-	UuidCommand* load_command;
-
-	UuidCommandCommandHandle();
+struct UuidCommandHandle : LoadCommandHandle {
+	UuidCommandHandle();
 	virtual void print() const;
 };
 
@@ -599,8 +584,6 @@ struct EntryPointCommand : LoadCommand {
 };
 
 struct EntryPointCommandHandle : LoadCommandHandle {
-	EntryPointCommand* load_command;
-
 	EntryPointCommandHandle();
 	virtual void print() const;
 };
@@ -627,7 +610,6 @@ struct LoadDyLinkerCommand : LoadCommand {
 };
 
 struct LoadDyLinkerCommandHandle : LoadCommandHandle {
-	LoadDyLinkerCommand* load_command;
     char* pathname;                 // Easier to access it
 
 	LoadDyLinkerCommandHandle();

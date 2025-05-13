@@ -25,10 +25,10 @@ void Debugger::dumpLowerMemoryRegionToFile(ExecutableFileBuilder file_builder) {
 }
 
 void Debugger::dumpUpperMemoryRegionToFile(ExecutableFileBuilder file_builder) {
-    this->dumpRawDataToFile(file_builder.mem_reg_manager->upperMemoryRegion->data,
+    this->dumpRawDataToFile(file_builder.mem_reg_manager->loadCommandsMemoryRegion->region.data,
         0,
-        file_builder.mem_reg_manager->upperMemoryRegion->offset_and_size.size,
-        "ExecutableFileUpperMemoryRegion_DUMP");
+        file_builder.mem_reg_manager->loadCommandsMemoryRegion->region.offset_and_size.size,
+        "LoadCommands_DUMP");
 }
 
 void Debugger::dumpWholeFileToFile(ExecutableFileBuilder file_builder) {
@@ -43,11 +43,11 @@ void Debugger::dumpLoadCommandsMemoryRegionToFile(Macho macho, uint32_t offset, 
 }
 
 void Debugger::dumpWholeLoadCommandsMemoryRegionToFile(Macho macho) {
-    this->dumpRawDataToFile(macho.load_commands_mem_region.region, 0, macho.header.sizeofcmds, "WholeLoadCommandMemoryRegion_DUMP");
+    this->dumpRawDataToFile(macho.load_commands_mem_region.region, 0, macho.header->sizeofcmds, "WholeLoadCommandMemoryRegion_DUMP");
 }
 
 void Debugger::dumpBuildVersionCommandToFile(Macho macho) {
-    size_t command_size = macho.build_version_handle->load_command->cmdsize - (sizeof(struct build_tool_version) * macho.build_version_handle->load_command->ntools);
+    size_t command_size = macho.build_version_handle->load_command->cmdsize - (sizeof(struct build_tool_version) * static_cast<BuildVersionCommand*>(macho.build_version_handle->load_command)->ntools);
     this->dumpRawDataToFile(macho.build_version_handle->load_command, 0, command_size, "BuildVersion_DUMP");
 }
 
@@ -76,8 +76,8 @@ void Debugger::dumpLinkeditPayloadsToFile(Macho macho) {
 void Debugger::debugSegmentCommands(Macho macho) {
     std::cout << "Segment commands:" << std::endl;
     for (SegmentHandle* seg : *macho.segment_handles) {
-        std::cout << seg->load_command->segname << std::endl;
-        if (seg->load_command->nsects != 0) {
+        std::cout << static_cast<SegmentCommand64*>(seg->load_command)->segname << std::endl;
+        if (static_cast<SegmentCommand64*>(seg->load_command)->nsects != 0) {
             std::cout << "  With sections:" << std::endl;
             for (SectionHandle* sect : seg->sections) {
                 std::cout << "      " <<sect->section->sectname << std::endl;
