@@ -15,7 +15,8 @@
 					"source" : ".",
 					"targetIndexes" : 
 					[
-						0
+						0,
+						1
 					]
 				}
 			],
@@ -30,7 +31,8 @@
 					"name" : "Linkito",
 					"targetIndexes" : 
 					[
-						0
+						0,
+						1
 					]
 				}
 			],
@@ -38,8 +40,15 @@
 			[
 				{
 					"directoryIndex" : 0,
+					"id" : "empty::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-empty-Debug-2df23aba8e1ac597cc1f.json",
+					"name" : "empty",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
 					"id" : "linkito::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-linkito-Debug-f7d437d6314f16149e81.json",
+					"jsonFile" : "target-linkito-Debug-ce1764bb2490934a8b24.json",
 					"name" : "linkito",
 					"projectIndex" : 0
 				}

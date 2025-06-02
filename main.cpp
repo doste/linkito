@@ -22,10 +22,10 @@ int main(int argc, char** argv) {
 	char* input_filename = argv[1];
     //Macho macho = Macho(input_filename, input_filename);
 
-    Debugger debugger = Debugger();
-    Tester tester = Tester();
+    auto debugger = Debugger();
+    auto tester = Tester();
 
-    MachoParser parser = MachoParser(input_filename);
+    auto parser = MachoParser(input_filename);
 
     //debugger.debugMacho(macho);
 
@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
     tester.testLoadCommandsMemoryRegionIsBuiltCorrectly(*parser.macho);
     //tester.printLoadCommands(macho);
 
-    ExecutableFileBuilder builder = ExecutableFileBuilder(*parser.macho);
+    auto builder = ExecutableFileBuilder(*parser.macho);
     builder.buildExecutableFile();
 
     //builder.debug();

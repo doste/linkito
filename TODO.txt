@@ -11,3 +11,8 @@
 //            of 8 bytes (these are forever the maximum alignment of any load commands)"
 
 Test this. Check that for every load command.
+
+
+
+USE std span INSTEAD OF OffsetAndSize!!!
+https://stackoverflow.com/questions/45723819/what-is-a-span-and-when-should-i-use-one

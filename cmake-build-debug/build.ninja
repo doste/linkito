@@ -51,49 +51,55 @@ build cmake_object_order_depends_target_linkito: phony || .
 
 build CMakeFiles/linkito.dir/Common.cpp.o: CXX_COMPILER__linkito_unscanned_Debug /Users/juanignaciobianchi/devdev/linkito++/Common.cpp || cmake_object_order_depends_target_linkito
   DEP_FILE = CMakeFiles/linkito.dir/Common.cpp.o.d
-  FLAGS = -std=c++11 -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2 -fcolor-diagnostics
+  FLAGS = -std=c++17 -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2 -fcolor-diagnostics -Wno-comment -Wno-writable-strings -g
   OBJECT_DIR = CMakeFiles/linkito.dir
   OBJECT_FILE_DIR = CMakeFiles/linkito.dir
 
 build CMakeFiles/linkito.dir/Macho.cpp.o: CXX_COMPILER__linkito_unscanned_Debug /Users/juanignaciobianchi/devdev/linkito++/Macho.cpp || cmake_object_order_depends_target_linkito
   DEP_FILE = CMakeFiles/linkito.dir/Macho.cpp.o.d
-  FLAGS = -std=c++11 -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2 -fcolor-diagnostics
+  FLAGS = -std=c++17 -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2 -fcolor-diagnostics -Wno-comment -Wno-writable-strings -g
   OBJECT_DIR = CMakeFiles/linkito.dir
   OBJECT_FILE_DIR = CMakeFiles/linkito.dir
 
 build CMakeFiles/linkito.dir/Debugger.cpp.o: CXX_COMPILER__linkito_unscanned_Debug /Users/juanignaciobianchi/devdev/linkito++/Debugger.cpp || cmake_object_order_depends_target_linkito
   DEP_FILE = CMakeFiles/linkito.dir/Debugger.cpp.o.d
-  FLAGS = -std=c++11 -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2 -fcolor-diagnostics
+  FLAGS = -std=c++17 -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2 -fcolor-diagnostics -Wno-comment -Wno-writable-strings -g
   OBJECT_DIR = CMakeFiles/linkito.dir
   OBJECT_FILE_DIR = CMakeFiles/linkito.dir
 
 build CMakeFiles/linkito.dir/Tester.cpp.o: CXX_COMPILER__linkito_unscanned_Debug /Users/juanignaciobianchi/devdev/linkito++/Tester.cpp || cmake_object_order_depends_target_linkito
   DEP_FILE = CMakeFiles/linkito.dir/Tester.cpp.o.d
-  FLAGS = -std=c++11 -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2 -fcolor-diagnostics
+  FLAGS = -std=c++17 -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2 -fcolor-diagnostics -Wno-comment -Wno-writable-strings -g
   OBJECT_DIR = CMakeFiles/linkito.dir
   OBJECT_FILE_DIR = CMakeFiles/linkito.dir
 
 build CMakeFiles/linkito.dir/LoadCommands.cpp.o: CXX_COMPILER__linkito_unscanned_Debug /Users/juanignaciobianchi/devdev/linkito++/LoadCommands.cpp || cmake_object_order_depends_target_linkito
   DEP_FILE = CMakeFiles/linkito.dir/LoadCommands.cpp.o.d
-  FLAGS = -std=c++11 -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2 -fcolor-diagnostics
+  FLAGS = -std=c++17 -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2 -fcolor-diagnostics -Wno-comment -Wno-writable-strings -g
   OBJECT_DIR = CMakeFiles/linkito.dir
   OBJECT_FILE_DIR = CMakeFiles/linkito.dir
 
 build CMakeFiles/linkito.dir/ExecutableFileBuilder.cpp.o: CXX_COMPILER__linkito_unscanned_Debug /Users/juanignaciobianchi/devdev/linkito++/ExecutableFileBuilder.cpp || cmake_object_order_depends_target_linkito
   DEP_FILE = CMakeFiles/linkito.dir/ExecutableFileBuilder.cpp.o.d
-  FLAGS = -std=c++11 -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2 -fcolor-diagnostics
+  FLAGS = -std=c++17 -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2 -fcolor-diagnostics -Wno-comment -Wno-writable-strings -g
+  OBJECT_DIR = CMakeFiles/linkito.dir
+  OBJECT_FILE_DIR = CMakeFiles/linkito.dir
+
+build CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.o: CXX_COMPILER__linkito_unscanned_Debug /Users/juanignaciobianchi/devdev/linkito++/ExecutableFileBuilder3.cpp || cmake_object_order_depends_target_linkito
+  DEP_FILE = CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.o.d
+  FLAGS = -std=c++17 -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2 -fcolor-diagnostics -Wno-comment -Wno-writable-strings -g
   OBJECT_DIR = CMakeFiles/linkito.dir
   OBJECT_FILE_DIR = CMakeFiles/linkito.dir
 
 build CMakeFiles/linkito.dir/MachoParser.cpp.o: CXX_COMPILER__linkito_unscanned_Debug /Users/juanignaciobianchi/devdev/linkito++/MachoParser.cpp || cmake_object_order_depends_target_linkito
   DEP_FILE = CMakeFiles/linkito.dir/MachoParser.cpp.o.d
-  FLAGS = -std=c++11 -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2 -fcolor-diagnostics
+  FLAGS = -std=c++17 -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2 -fcolor-diagnostics -Wno-comment -Wno-writable-strings -g
   OBJECT_DIR = CMakeFiles/linkito.dir
   OBJECT_FILE_DIR = CMakeFiles/linkito.dir
 
 build CMakeFiles/linkito.dir/main.cpp.o: CXX_COMPILER__linkito_unscanned_Debug /Users/juanignaciobianchi/devdev/linkito++/main.cpp || cmake_object_order_depends_target_linkito
   DEP_FILE = CMakeFiles/linkito.dir/main.cpp.o.d
-  FLAGS = -std=c++11 -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2 -fcolor-diagnostics
+  FLAGS = -std=c++17 -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2 -fcolor-diagnostics -Wno-comment -Wno-writable-strings -g
   OBJECT_DIR = CMakeFiles/linkito.dir
   OBJECT_FILE_DIR = CMakeFiles/linkito.dir
 
@@ -105,13 +111,44 @@ build CMakeFiles/linkito.dir/main.cpp.o: CXX_COMPILER__linkito_unscanned_Debug /
 #############################################
 # Link the executable linkito
 
-build linkito: CXX_EXECUTABLE_LINKER__linkito_Debug CMakeFiles/linkito.dir/Common.cpp.o CMakeFiles/linkito.dir/Macho.cpp.o CMakeFiles/linkito.dir/Debugger.cpp.o CMakeFiles/linkito.dir/Tester.cpp.o CMakeFiles/linkito.dir/LoadCommands.cpp.o CMakeFiles/linkito.dir/ExecutableFileBuilder.cpp.o CMakeFiles/linkito.dir/MachoParser.cpp.o CMakeFiles/linkito.dir/main.cpp.o
-  FLAGS = -std=c++11 -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2
+build linkito: CXX_EXECUTABLE_LINKER__linkito_Debug CMakeFiles/linkito.dir/Common.cpp.o CMakeFiles/linkito.dir/Macho.cpp.o CMakeFiles/linkito.dir/Debugger.cpp.o CMakeFiles/linkito.dir/Tester.cpp.o CMakeFiles/linkito.dir/LoadCommands.cpp.o CMakeFiles/linkito.dir/ExecutableFileBuilder.cpp.o CMakeFiles/linkito.dir/ExecutableFileBuilder3.cpp.o CMakeFiles/linkito.dir/MachoParser.cpp.o CMakeFiles/linkito.dir/main.cpp.o
+  FLAGS = -std=c++17 -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2
   OBJECT_DIR = CMakeFiles/linkito.dir
   POST_BUILD = :
   PRE_LINK = :
   TARGET_FILE = linkito
   TARGET_PDB = linkito.dbg
+
+# =============================================================================
+# Object build statements for EXECUTABLE target empty
+
+
+#############################################
+# Order-only phony target for empty
+
+build cmake_object_order_depends_target_empty: phony || .
+
+build CMakeFiles/empty.dir/empty.c.o: C_COMPILER__empty_unscanned_Debug /Users/juanignaciobianchi/devdev/linkito++/empty.c || cmake_object_order_depends_target_empty
+  DEP_FILE = CMakeFiles/empty.dir/empty.c.o.d
+  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2 -fcolor-diagnostics -Wno-comment -Wno-writable-strings -g
+  OBJECT_DIR = CMakeFiles/empty.dir
+  OBJECT_FILE_DIR = CMakeFiles/empty.dir
+
+
+# =============================================================================
+# Link build statements for EXECUTABLE target empty
+
+
+#############################################
+# Link the executable empty
+
+build empty: C_EXECUTABLE_LINKER__empty_Debug CMakeFiles/empty.dir/empty.c.o
+  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.4.sdk -mmacosx-version-min=15.2
+  OBJECT_DIR = CMakeFiles/empty.dir
+  POST_BUILD = :
+  PRE_LINK = :
+  TARGET_FILE = empty
+  TARGET_PDB = empty.dbg
 
 
 #############################################
@@ -147,7 +184,7 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 #############################################
 # Folder: /Users/juanignaciobianchi/devdev/linkito++/cmake-build-debug
 
-build all: phony linkito
+build all: phony linkito empty
 
 # =============================================================================
 # Built-in targets
